@@ -308,7 +308,7 @@ Return ONLY a valid JSON object with EXACTLY this structure:
 `.trim();
 
     try {
-      const result = await callGeminiWithTimeout(model.generateContent(prompt), 3000);
+      const result = await callGeminiWithTimeout(model.generateContent(prompt), 25000);
       const text = result.response.text();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON in response');
@@ -410,7 +410,7 @@ Respond in JSON with exactly these fields:
 `.trim();
 
     try {
-      const result = await callGeminiWithTimeout(model.generateContent(prompt), 3000);
+      const result = await callGeminiWithTimeout(model.generateContent(prompt), 25000);
       const raw = result.response.text();
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON in response');
