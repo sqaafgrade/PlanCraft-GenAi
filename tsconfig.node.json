@@ -8,5 +8,5 @@
     "strict": true,
     "noImplicitAny": true
   },
-  "include": ["vite.config.ts", "server.ts"]
+  "include": ["vite.config.ts", "server.ts", "src/lib/serverValidation.ts"]
 }

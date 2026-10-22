@@ -9,11 +9,11 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { createHash } from 'crypto';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import 'dotenv/config';
+import { ALLOWED_ORIGINS, VALID_EVENT_TYPES, VALID_LANGUAGES, sanitizeString, validatePlanPayload, validateZone, hashPayload, } from './src/lib/serverValidation';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -42,14 +42,6 @@ app.use(helmet({
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 // ── 2. Security: Dynamic CORS origin matching ────────────────
-const ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://localhost:3001',
-    'https://smartstadium.web.app',
-    'https://smartstadium.firebaseapp.com',
-    'https://genai-planner.web.app',
-    'https://genai-planner.firebaseapp.com',
-];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin)
@@ -78,9 +70,6 @@ const aiRateLimiter = rateLimit({
 });
 const aiCache = new Map();
 const MAX_CACHE_ENTRIES = 100;
-function hashPayload(obj) {
-    return createHash('sha256').update(JSON.stringify(obj)).digest('hex').slice(0, 16);
-}
 function pruneCache() {
     if (aiCache.size >= MAX_CACHE_ENTRIES) {
         const firstKey = aiCache.keys().next().value;
@@ -91,87 +80,21 @@ function pruneCache() {
 // ── 6. Gemini client (server-side only) ─────────────────────
 const apiKey = process.env.GEMINI_API_KEY ?? '';
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
-// ── 7. Domain Validation Helpers ──────────────────────────────
-export const VALID_EVENT_TYPES = [
-    'wedding',
-    'birthday',
-    'community',
-    'anniversary',
-    'corporate',
-    'party',
-];
-export const VALID_LANGUAGES = [
-    'en', 'ar', 'fr', 'es', 'pt', 'de', 'zh', 'ja', 'ko', 'ru', 'hi',
-    'it', 'nl', 'pl', 'tr', 'fa', 'ur', 'id', 'ms', 'th', 'he',
-];
-function isFiniteNumber(v) {
-    return typeof v === 'number' && Number.isFinite(v);
+const model = genAI.getGenerativeModel({ model: 'gemini-3.8-flash' });
+async function callGeminiWithTimeout(promise, ms = 3000) {
+    let timer;
+    const timeoutPromise = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error('AI generation timeout')), ms);
+    });
+    try {
+        return await Promise.race([promise, timeoutPromise]);
+    }
+    finally {
+        if (timer)
+            clearTimeout(timer);
+    }
 }
-function sanitizeString(input) {
-    // Strip control chars U+0000–U+001F to mitigate prompt injection
-    const controlCharPattern = new RegExp('[' + String.fromCharCode(0) + '-' + String.fromCharCode(31) + ']', 'g');
-    return input.replace(controlCharPattern, '').trim();
-}
-export function validatePlanPayload(p) {
-    if (typeof p !== 'object' || p === null)
-        return false;
-    const obj = p;
-    if (typeof obj.eventType !== 'string' || !VALID_EVENT_TYPES.includes(obj.eventType)) {
-        return false;
-    }
-    if (typeof obj.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(obj.date)) {
-        return false;
-    }
-    if (typeof obj.location !== 'string' || obj.location.trim().length === 0 || obj.location.length > 100) {
-        return false;
-    }
-    if (!isFiniteNumber(obj.guestCount) || obj.guestCount <= 0 || obj.guestCount > 100000) {
-        return false;
-    }
-    if (!isFiniteNumber(obj.totalBudget) || obj.totalBudget < 0 || obj.totalBudget > 100_000_000) {
-        return false;
-    }
-    if (obj.durationHours !== undefined && (!isFiniteNumber(obj.durationHours) || obj.durationHours <= 0 || obj.durationHours > 72)) {
-        return false;
-    }
-    if (obj.venuePreference !== undefined && (typeof obj.venuePreference !== 'string' || obj.venuePreference.length > 200)) {
-        return false;
-    }
-    if (obj.themePreference !== undefined && (typeof obj.themePreference !== 'string' || obj.themePreference.length > 200)) {
-        return false;
-    }
-    if (obj.dietaryRequirements !== undefined && !Array.isArray(obj.dietaryRequirements)) {
-        return false;
-    }
-    if (obj.accessibilityRequirements !== undefined && !Array.isArray(obj.accessibilityRequirements)) {
-        return false;
-    }
-    return true;
-}
-// Backward-compatible zone validator for legacy test preservation
-export function validateZone(z) {
-    if (typeof z !== 'object' || z === null)
-        return false;
-    const obj = z;
-    if (typeof obj.zoneId !== 'string' || obj.zoneId.length === 0 || obj.zoneId.length > 50)
-        return false;
-    if (!isFiniteNumber(obj.occupancy) || obj.occupancy < 0)
-        return false;
-    if (!isFiniteNumber(obj.capacity) || obj.capacity <= 0 || obj.capacity > 200000)
-        return false;
-    if (obj.occupancy > obj.capacity)
-        return false;
-    if (!isFiniteNumber(obj.ingressRate) || obj.ingressRate < 0)
-        return false;
-    if (!isFiniteNumber(obj.egressRate) || obj.egressRate < 0)
-        return false;
-    if (!isFiniteNumber(obj.queueLength) || obj.queueLength < 0)
-        return false;
-    if (!isFiniteNumber(obj.serviceRate) || obj.serviceRate <= 0)
-        return false;
-    return true;
-}
+export { ALLOWED_ORIGINS, VALID_EVENT_TYPES, VALID_LANGUAGES, validatePlanPayload, validateZone, hashPayload, };
 // ── Deterministic Plan Generator (Reliable fallback & test anchor) ──
 function generateDeterministicPlan(p) {
     const isWedding = p.eventType === 'wedding';
@@ -327,7 +250,7 @@ Return ONLY a valid JSON object with EXACTLY this structure:
 }
 `.trim();
     try {
-        const result = await model.generateContent(prompt);
+        const result = await callGeminiWithTimeout(model.generateContent(prompt), 3000);
         const text = result.response.text();
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch)
@@ -412,7 +335,7 @@ Respond in JSON with exactly these fields:
 }
 `.trim();
     try {
-        const result = await model.generateContent(prompt);
+        const result = await callGeminiWithTimeout(model.generateContent(prompt), 3000);
         const raw = result.response.text();
         const jsonMatch = raw.match(/\{[\s\S]*\}/);
         if (!jsonMatch)
@@ -460,4 +383,4 @@ app.listen(PORT, () => {
 });
 // Backward-compatibility export alias for insightCache
 const insightCache = aiCache;
-export { app, aiCache, insightCache, ALLOWED_ORIGINS, hashPayload };
+export { app, aiCache, insightCache };

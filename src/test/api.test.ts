@@ -4,14 +4,14 @@
 // boundary rejection, cache key generation, and HTTP API endpoints
 // ============================================================
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import {
   ALLOWED_ORIGINS,
   validatePlanPayload,
   validateZone,
   hashPayload,
   PlanPayload,
-} from '../../server';
+} from '../lib/serverValidation';
 
 // ── 1. CORS Origin Assertions ─────────────────────────────────
 describe('CORS Origin Validation', () => {
@@ -149,6 +149,12 @@ describe('hashPayload — SHA-256 Cache Key', () => {
 describe('HTTP API Endpoints', () => {
   const serverUrl = 'http://localhost:3001';
 
+  beforeAll(async () => {
+    const serverPath = '../../server';
+    await import(/* @vite-ignore */ serverPath);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  });
+
   it('GET /api/health returns status 200 and cache size', async () => {
     const res = await fetch(`${serverUrl}/api/health`);
     expect(res.status).toBe(200);
@@ -188,7 +194,7 @@ describe('HTTP API Endpoints', () => {
     expect(data.overview).toBeDefined();
     expect(data.recommendedTheme).toBeDefined();
     expect(data.budgetAllocation).toBeDefined();
-  });
+  }, 15000);
 
   it('POST /api/translate returns 400 for invalid target language', async () => {
     const res = await fetch(`${serverUrl}/api/translate`, {
@@ -215,7 +221,7 @@ describe('HTTP API Endpoints', () => {
     const data = (await res.json()) as { translatedText: string; targetLanguage: string };
     expect(data.translatedText).toBeDefined();
     expect(data.targetLanguage).toBe('es');
-  });
+  }, 15000);
 
   it('GET /some-random-route serves SPA fallback', async () => {
     const res = await fetch(`${serverUrl}/some-random-route`);
