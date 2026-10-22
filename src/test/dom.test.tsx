@@ -1,204 +1,241 @@
 // ============================================================
 // src/test/dom.test.tsx
-// JSDOM DOM interaction tests
-// Per TESTING.md §1.5 — DOM Interactions & Backup Events
+// JSDOM DOM interaction and event handling tests
+// Verifies user input changes, form submissions, and state updates
 // ============================================================
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { ZoneInputForm } from '@/components/shared/ZoneInputForm';
-import { VenueNavigator } from '@/components/Navigation/VenueNavigator';
-import { SustainabilityDashboard } from '@/components/Sustainability/SustainabilityDashboard';
-import { AlertBanner } from '@/components/shared/AlertBanner';
-import { VolunteerCommandCenter } from '@/components/Volunteer/VolunteerCommandCenter';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { BudgetManager } from '@/components/Budget/BudgetManager';
+import { TimelineSchedule } from '@/components/Timeline/TimelineSchedule';
+import { VendorChecklist } from '@/components/Vendors/VendorChecklist';
+import { PersonalizedIdeas } from '@/components/Ideas/PersonalizedIdeas';
+import { AIPlanningAssistant } from '@/components/Assistant/AIPlanningAssistant';
 import { MultilingualAssistant } from '@/components/Multilingual/MultilingualAssistant';
-import {
-  ZoneData,
-  AccessibilityMode,
-  WayfindingSession,
-  RouteOption,
-  Checkpoint,
-  AlertSeverity,
-  StadiumAlert,
-} from '@/types';
+import { AlertBanner } from '@/components/shared/AlertBanner';
+import { AppContextProvider } from '@/context/AppContext';
+import { EventItem, EventType, EventStatus, AlertSeverity } from '@/types';
 
-// ── Helpers ──────────────────────────────────────────────────
-const mockZone: ZoneData = {
-  zoneId: 'Z1', zoneName: 'North Stand', occupancy: 12000, capacity: 20000,
-  ingressRate: 200, egressRate: 50, queueLength: 120, serviceRate: 40, lastUpdated: Date.now(),
+const mockEvent: EventItem = {
+  id: 'dom-evt-1',
+  title: 'Alex Birthday Bash',
+  eventType: EventType.Birthday,
+  date: '2026-10-15',
+  location: 'Chicago, IL',
+  guestCount: 60,
+  totalBudget: 4500,
+  status: EventStatus.Planning,
+  preferences: {
+    themePreference: 'Retro 80s Arcade',
+    venuePreference: 'Lounge with game area',
+    dietaryRequirements: ['Vegetarian'],
+    accessibilityRequirements: ['Step-Free Access'],
+  },
+  createdAt: Date.now(),
+  lastUpdated: Date.now(),
 };
 
-const mockSession: WayfindingSession = {
-  fromNodeId: 'gate-a', toNodeId: 'north-blk',
-  activeMode: AccessibilityMode.Standard, selectedRoute: null, isActive: false,
-};
+// ── 1. BudgetManager DOM Interactions ─────────────────────────
+describe('BudgetManager — DOM Interactions', () => {
+  it('updates input fields and submits a new expense item', () => {
+    render(
+      <AppContextProvider>
+        <BudgetManager event={mockEvent} />
+      </AppContextProvider>
+    );
 
-const mockRoute: RouteOption = {
-  mode: AccessibilityMode.Standard, waypoints: ['gate-a', 'lobby', 'concourse', 'north-blk'],
-  totalDistanceMeters: 230, estimatedMinutes: 3, elevatorRequired: false, restAreaCount: 1,
-};
+    const nameInput = screen.getByLabelText(/Item Name/i);
+    const estInput = screen.getByLabelText(/Estimated/i);
+    const actInput = screen.getByLabelText(/Actual Spent/i);
 
-// ── Zone Input Triggers ───────────────────────────────────────
-describe('ZoneInputForm — DOM Interactions', () => {
-  it('calls onUpdate when occupancy input changes', () => {
-    const onUpdate = vi.fn();
-    render(<ZoneInputForm zone={mockZone} onUpdate={onUpdate} />);
-    const input = screen.getByLabelText(/Current Occupancy for North Stand/i);
-    fireEvent.change(input, { target: { value: '15000' } });
-    expect(onUpdate).toHaveBeenCalledWith('Z1', { occupancy: 15000 });
+    fireEvent.change(nameInput, { target: { value: 'Arcade Token Bundles' } });
+    fireEvent.change(estInput, { target: { value: '350' } });
+    fireEvent.change(actInput, { target: { value: '320' } });
+
+    expect((nameInput as HTMLInputElement).value).toBe('Arcade Token Bundles');
+    expect((estInput as HTMLInputElement).value).toBe('350');
+    expect((actInput as HTMLInputElement).value).toBe('320');
+
+    const submitBtn = screen.getByRole('button', { name: /Add Expense Item/i });
+    fireEvent.click(submitBtn);
+
+    // New item appears in the list
+    expect(screen.getByText('Arcade Token Bundles')).toBeInTheDocument();
   });
 
-  it('calls onUpdate when capacity input changes', () => {
-    const onUpdate = vi.fn();
-    render(<ZoneInputForm zone={mockZone} onUpdate={onUpdate} />);
-    const input = screen.getByLabelText(/Zone Capacity for North Stand/i);
-    fireEvent.change(input, { target: { value: '25000' } });
-    expect(onUpdate).toHaveBeenCalledWith('Z1', { capacity: 25000 });
-  });
+  it('filters budget items by category selector', () => {
+    render(
+      <AppContextProvider>
+        <BudgetManager event={mockEvent} />
+      </AppContextProvider>
+    );
 
-  it('does not call onUpdate for NaN input', () => {
-    const onUpdate = vi.fn();
-    render(<ZoneInputForm zone={mockZone} onUpdate={onUpdate} />);
-    const input = screen.getByLabelText(/Current Occupancy for North Stand/i);
-    fireEvent.change(input, { target: { value: 'abc' } });
-    expect(onUpdate).not.toHaveBeenCalled();
-  });
-
-  it('renders all 6 input fields', () => {
-    render(<ZoneInputForm zone={mockZone} onUpdate={() => {}} />);
-    const inputs = screen.getAllByRole('spinbutton');
-    expect(inputs.length).toBe(6);
+    const filter = screen.getByLabelText(/Filter:/i);
+    fireEvent.change(filter, { target: { value: 'catering' } });
+    expect((filter as HTMLSelectElement).value).toBe('catering');
   });
 });
 
-// ── Accessibility Toggle ──────────────────────────────────────
-describe('VenueNavigator — Accessibility Mode Toggle', () => {
-  const navProps = {
-    session: mockSession,
-    routes: [mockRoute],
-    checkpoints: [] as Checkpoint[],
-    setFrom: vi.fn(),
-    setTo: vi.fn(),
-    setMode: vi.fn(),
-    startNavigation: vi.fn(),
-    endNavigation: vi.fn(),
-    addCheckpoint: vi.fn(),
-    deleteCheckpoint: vi.fn(),
-    clearCheckpoints: vi.fn(),
-  };
+// ── 2. TimelineSchedule DOM Interactions ──────────────────────
+describe('TimelineSchedule — DOM Interactions', () => {
+  it('allows adding a custom preparation milestone', () => {
+    render(
+      <AppContextProvider>
+        <TimelineSchedule event={mockEvent} />
+      </AppContextProvider>
+    );
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+    const titleInput = screen.getByLabelText(/Task Title/i);
+    const dateInput = screen.getByLabelText(/Target Deadline/i);
+
+    fireEvent.change(titleInput, { target: { value: 'Order Themed Arcade Cake' } });
+    fireEvent.change(dateInput, { target: { value: '2026-10-01' } });
+
+    const submitBtn = screen.getByRole('button', { name: /Add Milestone/i });
+    fireEvent.click(submitBtn);
+
+    expect(screen.getByText('Order Themed Arcade Cake')).toBeInTheDocument();
   });
 
-  it('calls setMode when wheelchair mode is selected', () => {
-    render(<VenueNavigator {...navProps} />);
-    const wheelchairBtn = screen.getByRole('radio', { name: /Wheelchair/i });
-    fireEvent.click(wheelchairBtn);
-    expect(navProps.setMode).toHaveBeenCalledWith(AccessibilityMode.Wheelchair);
-  });
+  it('allows toggling task completion status', () => {
+    render(
+      <AppContextProvider>
+        <TimelineSchedule event={mockEvent} />
+      </AppContextProvider>
+    );
 
-  it('calls setMode when visual impairment mode is selected', () => {
-    render(<VenueNavigator {...navProps} />);
-    const visualBtn = screen.getByRole('radio', { name: /Visual Aid/i });
-    fireEvent.click(visualBtn);
-    expect(navProps.setMode).toHaveBeenCalledWith(AccessibilityMode.VisualImpairment);
-  });
-
-  it('calls setMode when elderly mode is selected', () => {
-    render(<VenueNavigator {...navProps} />);
-    const elderlyBtn = screen.getByRole('radio', { name: /Elderly/i });
-    fireEvent.click(elderlyBtn);
-    expect(navProps.setMode).toHaveBeenCalledWith(AccessibilityMode.Elderly);
-  });
-
-  it('calls startNavigation when navigate button is clicked', () => {
-    render(<VenueNavigator {...navProps} />);
-    const startBtn = screen.getByRole('button', { name: /Start Navigation/i });
-    fireEvent.click(startBtn);
-    expect(navProps.startNavigation).toHaveBeenCalled();
-  });
-
-  it('calls addCheckpoint when checkpoint form is submitted', () => {
-    render(<VenueNavigator {...navProps} />);
-    const labelInput = screen.getByPlaceholderText(/Label/i);
-    fireEvent.change(labelInput, { target: { value: 'Test Point' } });
-    const addBtn = screen.getByRole('button', { name: /Add checkpoint/i });
-    fireEvent.click(addBtn);
-    expect(navProps.addCheckpoint).toHaveBeenCalledWith('Test Point', expect.any(String));
-  });
-});
-
-// ── Alert Dismiss ─────────────────────────────────────────────
-describe('AlertBanner — Dismiss Interaction', () => {
-  it('calls onDismiss with correct alert id when dismiss button clicked', () => {
-    const onDismiss = vi.fn();
-    const alerts: StadiumAlert[] = [
-      { id: 'alert-1', severity: AlertSeverity.Warning, title: 'Zone Warning', message: 'High density', timestamp: Date.now(), dismissed: false },
-    ];
-    render(<AlertBanner alerts={alerts} onDismiss={onDismiss} />);
-    const dismissBtn = screen.getByRole('button', { name: /Dismiss alert/i });
-    fireEvent.click(dismissBtn);
-    expect(onDismiss).toHaveBeenCalledWith('alert-1');
-  });
-});
-
-// ── Volunteer Task Interactions ───────────────────────────────
-describe('VolunteerCommandCenter — Task Interactions', () => {
-  it('renders urgent task count badge', () => {
-    render(<VolunteerCommandCenter />);
-    const urgentBadges = screen.getAllByText('Urgent');
-    expect(urgentBadges.length).toBeGreaterThan(0);
-  });
-
-  it('marks task as complete when checkbox clicked', () => {
-    render(<VolunteerCommandCenter />);
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes.length).toBeGreaterThan(0);
-    fireEvent.click(checkboxes[0]);
-    // After click, checkbox should be checked
-    expect(checkboxes[0]).toBeChecked();
+
+    const firstChk = checkboxes[0] as HTMLInputElement;
+    const initialChecked = firstChk.checked;
+    fireEvent.click(firstChk);
+    expect(firstChk.checked).toBe(!initialChecked);
   });
 });
 
-// ── Sustainability — Slider Interaction ───────────────────────
-describe('SustainabilityDashboard — Slider Interactions', () => {
-  it('renders waste diversion slider', () => {
-    render(<SustainabilityDashboard />);
-    const slider = screen.getByRole('slider', { name: /Waste diversion rate/i });
-    expect(slider).toBeInTheDocument();
+// ── 3. VendorChecklist DOM Interactions ───────────────────────
+describe('VendorChecklist — DOM Interactions', () => {
+  it('adds a new vendor checklist item', () => {
+    render(
+      <AppContextProvider>
+        <VendorChecklist event={mockEvent} />
+      </AppContextProvider>
+    );
+
+    const nameInput = screen.getByLabelText(/Vendor \/ Service Name/i);
+    const estInput = screen.getByLabelText(/Estimated Cost/i);
+
+    fireEvent.change(nameInput, { target: { value: 'Retro Synthwave DJ' } });
+    fireEvent.change(estInput, { target: { value: '600' } });
+
+    const submitBtn = screen.getByRole('button', { name: /Add Vendor Item/i });
+    fireEvent.click(submitBtn);
+
+    expect(screen.getByText('Retro Synthwave DJ')).toBeInTheDocument();
   });
 
-  it('updates energy display when energy slider changes', () => {
-    render(<SustainabilityDashboard />);
-    const slider = screen.getByRole('slider', { name: /Energy usage/i });
-    fireEvent.change(slider, { target: { value: '20000' } });
-    // 20,000 appears in multiple elements (label + display)
-    const energyText = screen.getAllByText(/20,000/i);
-    expect(energyText.length).toBeGreaterThan(0);
+  it('changes category filter dropdown', () => {
+    render(
+      <AppContextProvider>
+        <VendorChecklist event={mockEvent} />
+      </AppContextProvider>
+    );
+
+    const catFilter = screen.getByLabelText(/Filter by category/i);
+    fireEvent.change(catFilter, { target: { value: 'venue' } });
+    expect((catFilter as HTMLSelectElement).value).toBe('venue');
   });
 });
 
-// ── Multilingual — Emergency Mode Toggle ─────────────────────
-describe('MultilingualAssistant — Emergency Mode Toggle', () => {
-  it('renders emergency mode toggle button', () => {
-    render(<MultilingualAssistant />);
-    const btn = screen.getByRole('button', { name: /Emergency Mode/i });
-    expect(btn).toBeInTheDocument();
+// ── 4. PersonalizedIdeas DOM Interactions ─────────────────────
+describe('PersonalizedIdeas — DOM Interactions', () => {
+  it('switches category filter tabs on click', () => {
+    render(
+      <AppContextProvider>
+        <PersonalizedIdeas event={mockEvent} />
+      </AppContextProvider>
+    );
+
+    const budgetTab = screen.getByRole('tab', { name: /Smart Budget Tips/i });
+    fireEvent.click(budgetTab);
+    expect(budgetTab).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('shows emergency templates when emergency mode is activated', () => {
+  it('adds a custom user-defined idea', () => {
+    render(
+      <AppContextProvider>
+        <PersonalizedIdeas event={mockEvent} />
+      </AppContextProvider>
+    );
+
+    const titleInput = screen.getByLabelText(/^Title/i);
+    const descInput = screen.getByLabelText(/Concept Description/i);
+
+    fireEvent.change(titleInput, { target: { value: 'Glow Stick Send-off' } });
+    fireEvent.change(descInput, { target: { value: 'Hand out neon glow sticks for final dance' } });
+
+    const addBtn = screen.getByRole('button', { name: /Add Idea/i });
+    fireEvent.click(addBtn);
+
+    expect(screen.getByText('Glow Stick Send-off')).toBeInTheDocument();
+  });
+});
+
+// ── 5. AIPlanningAssistant DOM Interactions ───────────────────
+describe('AIPlanningAssistant — DOM Interactions', () => {
+  it('updates form inputs and toggles preference chips', () => {
+    render(
+      <AppContextProvider>
+        <AIPlanningAssistant />
+      </AppContextProvider>
+    );
+
+    const locationInput = screen.getByLabelText(/City \/ Location/i);
+    fireEvent.change(locationInput, { target: { value: 'Denver, CO' } });
+    expect((locationInput as HTMLInputElement).value).toBe('Denver, CO');
+
+    const veganChip = screen.getByRole('button', { name: /\+ Vegan/i });
+    fireEvent.click(veganChip);
+    expect(screen.getByRole('button', { name: /✓ Vegan/i })).toBeInTheDocument();
+  });
+});
+
+// ── 6. MultilingualAssistant DOM Interactions ─────────────────
+describe('MultilingualAssistant — DOM Interactions', () => {
+  it('selects a target language button', () => {
     render(<MultilingualAssistant />);
-    const btn = screen.getByRole('button', { name: /Emergency Mode/i });
-    act(() => { fireEvent.click(btn); });
-    expect(screen.getByText(/Emergency Announcement Templates/i)).toBeInTheDocument();
+    const spanishBtn = screen.getByRole('button', { name: /Español/i });
+    fireEvent.click(spanishBtn);
+    expect(spanishBtn).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('shows language selector buttons for all 20 languages', () => {
+  it('updates textarea and enables translate button', () => {
     render(<MultilingualAssistant />);
-    // There should be 20 language buttons
-    const group = screen.getByRole('group', { name: /Language selection/i });
-    const buttons = group.querySelectorAll('button');
-    expect(buttons.length).toBe(20);
+    const textarea = screen.getByLabelText(/Text to Translate/i);
+    fireEvent.change(textarea, { target: { value: 'Welcome to our celebration!' } });
+    expect((textarea as HTMLTextAreaElement).value).toBe('Welcome to our celebration!');
+  });
+});
+
+// ── 7. AlertBanner DOM Interactions ───────────────────────────
+describe('AlertBanner — DOM Interactions', () => {
+  it('calls onDismiss when close button is clicked', () => {
+    const onDismiss = vi.fn();
+    const alerts = [
+      {
+        id: 'alt-test-1',
+        severity: AlertSeverity.Critical,
+        title: 'Budget Alert',
+        message: 'Spending overrun',
+        timestamp: Date.now(),
+        dismissed: false,
+      },
+    ];
+
+    render(<AlertBanner alerts={alerts} onDismiss={onDismiss} />);
+    const dismissBtn = screen.getByLabelText(/Dismiss alert: Budget Alert/i);
+    fireEvent.click(dismissBtn);
+    expect(onDismiss).toHaveBeenCalledWith('alt-test-1');
   });
 });

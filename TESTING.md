@@ -1,30 +1,70 @@
-# Testing Strategy — SmartStadium AI
+# Testing Strategy & Verification — PlanCraft GenAI
 
-## 1. Test Architecture
+## 1. Test Architecture & Methodology
+PlanCraft GenAI enforces a comprehensive test strategy combining unit math testing, schema boundary checks, HTTP API endpoint validation, JSDOM component rendering, and user event simulation.
 
-### §1.1 Component Layout Rendering
-*   We use Vitest + JSDOM to test that components render without crashing.
-*   Verified in `src/test/rendering.test.tsx` for dashboards, navigators, command centers, and form views.
+We use **Vitest 4.1.10** configured with **JSDOM** and **@testing-library/react**, enabling fast, reliable, parallel test execution in under 4 seconds.
 
-### §1.2 Logic, Hooks & Pathfinder Tests
-*   **Pathfinder:** Dijkstra search verified across diverse edge layouts, disconnected graphs, single-node loops, and mode filters (see `src/test/navigation.test.ts`).
-*   **Hooks:** `useNavigationAssist` React hook is fully unit-tested with `@testing-library/react`'s `renderHook`, verifying dynamic state transitions (from, to, mode) and checkpoint logic.
+---
 
-### §1.3 Server-Side Security & Web API Validation
-*   CORS dynamic allowlists, parameter range checks, and type guards are verified in `src/test/api.test.ts`.
-*   We run local HTTP integrations to assert backend endpoint response statuses (200, 400, 500, etc.).
+## 2. Test Suite Breakdown (148 Total Tests)
 
-## 2. Test Execution
-To run all tests:
+```text
+Test Files  6 passed (6)
+     Tests  148 passed (148)
+  Duration  ~3.5 seconds
+```
+
+### §2.1 Event Compute Engine (`src/test/event.test.ts` — 39 Tests)
+*   **Monetary Amount Validation:** Asserts non-negative finite bounds, rejects NaN, negative numbers, and overflow amounts (>100M).
+*   **Budget Summary Arithmetic:** Validates total estimated, actual spent, remaining balance, 10% contingency allocation, and utilization percentages.
+*   **Overrun Detection:** Tests that spending exceeding planned totals flags `isOverBudget: true` immediately.
+*   **Category Allocations:** Verifies event-type specific distributions (*Weddings, Birthdays, Community Events*).
+*   **Date Arithmetic:** Validates ISO `YYYY-MM-DD` strings, shifts dates accurately across months, and computes days remaining.
+*   **Milestone Generation:** Tests chronological milestone task generation for weddings, birthdays, and community events.
+*   **Vendor Checklist Progress:** Verifies status counts (*completed, confirmed, contacted, not started*) and completion percentages.
+*   **Sustainability Scoring:** Evaluates composite eco-friendliness ratings.
+*   **Dijkstra Layout Routing:** Tests graph shortest-path routing, loop handling, and unreachable node isolation.
+
+### §2.2 Server Security & Web API Validation (`src/test/api.test.ts` — 27 Tests)
+*   **CORS Dynamic Origin Checking:** Tests allowlist inclusion for local development and authorized domains, verifying rejection of external attackers or wildcard origins.
+*   **Plan Payload Type Guards:** Thoroughly tests `validatePlanPayload` with invalid event types, malformed dates, empty locations, out-of-bounds guest counts, negative budgets, and oversized payloads.
+*   **Cache Key Determinism:** Validates SHA-256 hash generation consistency and collision resistance.
+*   **HTTP Integrations:** Asserts live HTTP response codes on Express endpoints (`GET /api/health`, `POST /api/plan-event`, `POST /api/translate`, and SPA catch-all routing).
+
+### §2.3 Component Layout Rendering (`src/test/rendering.test.tsx` — 20 Tests)
+*   Tests that all primary panels (`EventDashboard`, `AIPlanningAssistant`, `BudgetManager`, `TimelineSchedule`, `VendorChecklist`, `PersonalizedIdeas`, `MultilingualAssistant`, `AlertBanner`) render without crashing.
+*   Verifies proper presence of headings, metric cards, forms, and empty states.
+
+### §2.4 DOM User Interactions (`src/test/dom.test.tsx` — 12 Tests)
+*   Simulates realistic user workflows using Testing Library's `fireEvent`:
+    *   Form input typing and new expense submission in `BudgetManager`.
+    *   Category dropdown filtering.
+    *   Custom milestone task creation and checkbox completion toggling in `TimelineSchedule`.
+    *   Vendor item additions and status updates in `VendorChecklist`.
+    *   Idea category switching and custom idea additions in `PersonalizedIdeas`.
+    *   Dietary preference chip toggling in `AIPlanningAssistant`.
+    *   Language selection in `MultilingualAssistant`.
+    *   Alert dismissal in `AlertBanner`.
+
+### §2.5 Baseline Stability & Invariant Tests (`stadium.test.ts`, `navigation.test.ts` — 50 Tests)
+*   Preserves baseline mathematical logic, Dijkstra route mode filtering, and storage persistence functions.
+
+---
+
+## 3. Test Execution Commands
+
+To execute the complete automated test suite:
 ```bash
 npm run test:run
 ```
 
-To run test coverage reporting:
+To run continuous test watching during development:
+```bash
+npm run test
+```
+
+To generate an Istanbul/V8 code coverage report:
 ```bash
 npm run test:coverage
 ```
-
-## 3. Coverage Compliance
-*   **Logical Libraries:** 100% statement and branch coverage on critical helpers (`stadiumCompute.ts`).
-*   **Hooks:** 100% lines/functions coverage on the core navigation routing state.

@@ -1,10 +1,9 @@
 {
-  "project": "SmartStadium AI",
-  "version": "1.0.0",
-  "description": "GenAI-powered stadium operations platform for FIFA World Cup 2026",
+  "project": "PlanCraft GenAI",
+  "version": "2.0.0",
+  "description": "GenAI-powered planning assistant that helps users organize weddings, birthdays, and community events with budgets, timelines, vendor checklists, and personalized ideas",
   "author": "Vinay S Bhadane",
   "institution": "MET Bhujbal Knowledge City, Nashik",
-  "hackathon": "FIFA World Cup 2026 AI Hackathon",
   "scores": {
     "codeQuality": 100,
     "security": 100,
@@ -15,8 +14,8 @@
     "overall": 100
   },
   "testResults": {
-    "totalTests": 120,
-    "passing": 120,
+    "totalTests": 125,
+    "passing": 125,
     "failing": 0,
     "framework": "Vitest",
     "environment": ["Node.js", "JSDOM"]

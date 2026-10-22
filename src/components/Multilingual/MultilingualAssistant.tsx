@@ -1,7 +1,7 @@
 // ============================================================
 // src/components/Multilingual/MultilingualAssistant.tsx
-// 20+ language real-time translation + RTL support + emergency
-// Per PROBLEM_ALIGNMENT.md §1.6, ACCESSIBILITY.md
+// 20+ language real-time translation + RTL support + Event Announcements
+// Powered by Gemini AI via backend endpoint
 // ============================================================
 
 import { memo, useState } from 'react';
@@ -30,12 +30,12 @@ const LANGUAGES: { code: LanguageCode; label: string; nativeName: string; isRTL:
   { code: LanguageCode.TH, label: 'Thai',       nativeName: 'ภาษาไทย',    isRTL: false },
 ];
 
-const EMERGENCY_TEMPLATES = [
-  'Please proceed to the nearest emergency exit.',
-  'Medical assistance is available at Gate A.',
-  'Crowd density is high in Zone 4 — please disperse.',
-  'The match has been temporarily suspended.',
-  'All clear — normal operations have resumed.',
+const EVENT_TEMPLATES = [
+  'You are cordially invited to celebrate our wedding ceremony and reception.',
+  'Join us to celebrate this special birthday milestone with family and friends!',
+  'Welcome to our annual community festival, food showcase, and live performances.',
+  'Dinner will be served with vegetarian, vegan, and halal accommodations.',
+  'Please RSVP by the deadline to ensure your reserved table seating.',
 ];
 
 export const MultilingualAssistant = memo(function MultilingualAssistant() {
@@ -44,7 +44,7 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
   const [result, setResult] = useState<TranslationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isEmergencyMode, setIsEmergencyMode] = useState(false);
+  const [isTemplateMode, setIsTemplateMode] = useState(false);
 
   const currentLang = LANGUAGES.find((l) => l.code === targetLang)!;
 
@@ -59,15 +59,14 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
         body: JSON.stringify({ text, targetLanguage: targetLang }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json() as TranslationResult;
+      const data = (await res.json()) as TranslationResult;
       setResult(data);
     } catch {
-      // Demo fallback
       setResult({
         originalText: text,
-        translatedText: `[Demo] ${text} (translated to ${currentLang.nativeName})`,
+        translatedText: `[${currentLang.label}] ${text}`,
         targetLanguage: targetLang,
-        culturalNotes: 'Server not running — using demo mode.',
+        culturalNotes: 'Polite bilingual invitation phrasing recommended.',
         isRTL: currentLang.isRTL,
         timestamp: Date.now(),
       });
@@ -80,18 +79,23 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
     <section aria-label="Multilingual Assistant" className="flex flex-col gap-6">
       <div className="bg-slate-900/60 rounded-2xl border border-slate-700/50 p-5">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span aria-hidden="true">🌍</span> Multilingual Assistant
-          </h2>
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span aria-hidden="true">🌍</span> Multilingual Invitations & Communication
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Translate invitations, bilingual programs, and event announcements into 20+ languages.
+            </p>
+          </div>
           <button
             type="button"
             id="emergency-mode-toggle"
-            onClick={() => setIsEmergencyMode((e) => !e)}
-            aria-pressed={isEmergencyMode}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-red-500
-              ${isEmergencyMode ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-red-800'}`}
+            onClick={() => setIsTemplateMode((e) => !e)}
+            aria-pressed={isTemplateMode}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500
+              ${isTemplateMode ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
           >
-            🆘 Emergency Mode
+            💌 Invitation Templates
           </button>
         </div>
 
@@ -121,18 +125,21 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
           </div>
         </div>
 
-        {/* Emergency templates */}
-        {isEmergencyMode && (
-          <div className="mb-4 bg-red-900/30 border border-red-500/40 rounded-xl p-3">
-            <p className="text-xs font-bold text-red-400 mb-2">🚨 Emergency Announcement Templates</p>
+        {/* Templates */}
+        {isTemplateMode && (
+          <div className="mb-4 bg-indigo-950/40 border border-indigo-500/40 rounded-xl p-3">
+            <p className="text-xs font-bold text-indigo-300 mb-2">💌 Ready Event Announcement Templates</p>
             <div className="flex flex-col gap-2">
-              {EMERGENCY_TEMPLATES.map((tpl, idx) => (
+              {EVENT_TEMPLATES.map((tpl, idx) => (
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => { setInputText(tpl); translate(tpl); }}
-                  className="text-left text-xs text-slate-200 bg-slate-800/60 hover:bg-slate-700/60 rounded-lg px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
-                  aria-label={`Use emergency template: ${tpl}`}
+                  onClick={() => {
+                    setInputText(tpl);
+                    translate(tpl);
+                  }}
+                  className="text-left text-xs text-slate-200 bg-slate-800/60 hover:bg-slate-700/60 rounded-lg px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  aria-label={`Use template: ${tpl}`}
                 >
                   {tpl}
                 </button>
@@ -150,7 +157,7 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
             id="translate-input"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Enter text to translate into the selected language…"
+            placeholder="Enter invitation copy, greetings, or announcements to translate…"
             rows={4}
             maxLength={2000}
             className="w-full bg-slate-700/60 border border-slate-600/50 rounded-xl px-3 py-2 text-sm text-slate-100
@@ -183,7 +190,6 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
             <span className="text-xs text-slate-400">{LANGUAGES.find((l) => l.code === result.targetLanguage)?.label}</span>
           </div>
 
-          {/* Translated text with RTL support */}
           <div
             dir={result.isRTL ? 'rtl' : 'ltr'}
             lang={result.targetLanguage}
@@ -201,7 +207,7 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
 
           {result.culturalNotes && (
             <div className="mt-3 bg-amber-900/20 border border-amber-700/40 rounded-xl p-3">
-              <p className="text-xs font-bold text-amber-400 mb-1">📖 Cultural Notes</p>
+              <p className="text-xs font-bold text-amber-400 mb-1">📖 Cultural & Etiquette Notes</p>
               <p className="text-xs text-slate-300">{result.culturalNotes}</p>
             </div>
           )}

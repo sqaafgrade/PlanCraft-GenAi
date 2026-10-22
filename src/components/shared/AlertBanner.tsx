@@ -1,22 +1,33 @@
 // ============================================================
 // src/components/shared/AlertBanner.tsx
-// Multi-channel emergency alerts — visual + aria-live (audio)
-// Per ACCESSIBILITY.md §1.3, PROBLEM_ALIGNMENT.md §1.8
+// Multi-channel priority alerts — visual + aria-live (accessible)
+// Supports budget overrun warnings, overdue milestones, and urgent notices
 // ============================================================
 
 import { memo } from 'react';
-import { StadiumAlert, AlertSeverity } from '@/types';
+import { AlertSeverity } from '@/types';
+
+export interface AlertItem {
+  id: string;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  zoneId?: string;
+  eventId?: string;
+  timestamp: number;
+  dismissed: boolean;
+}
 
 interface AlertBannerProps {
-  alerts: StadiumAlert[];
+  alerts: AlertItem[];
   onDismiss: (id: string) => void;
 }
 
 const SEVERITY_STYLES: Record<AlertSeverity, string> = {
-  [AlertSeverity.Info]:      'bg-blue-900/60 border-blue-400 text-blue-100',
-  [AlertSeverity.Warning]:   'bg-yellow-900/60 border-yellow-400 text-yellow-100',
-  [AlertSeverity.Critical]:  'bg-orange-900/60 border-orange-400 text-orange-100',
-  [AlertSeverity.Emergency]: 'bg-red-900/70 border-red-400 text-red-100 animate-pulse',
+  [AlertSeverity.Info]:      'bg-blue-900/80 border-blue-400 text-blue-100',
+  [AlertSeverity.Warning]:   'bg-amber-900/80 border-amber-400 text-amber-100',
+  [AlertSeverity.Critical]:  'bg-orange-900/80 border-orange-400 text-orange-100',
+  [AlertSeverity.Emergency]: 'bg-rose-900/90 border-rose-400 text-rose-100 animate-pulse',
 };
 
 const SEVERITY_ICONS: Record<AlertSeverity, string> = {
@@ -31,7 +42,6 @@ export const AlertBanner = memo(function AlertBanner({ alerts, onDismiss }: Aler
   if (visible.length === 0) return null;
 
   return (
-    // aria-live="assertive" ensures screen readers announce alerts immediately
     <div
       role="alert"
       aria-live="assertive"
@@ -41,7 +51,7 @@ export const AlertBanner = memo(function AlertBanner({ alerts, onDismiss }: Aler
       {visible.map((alert) => (
         <div
           key={alert.id}
-          className={`border rounded-xl p-4 flex items-start gap-3 shadow-2xl backdrop-blur-sm ${SEVERITY_STYLES[alert.severity]}`}
+          className={`border rounded-xl p-4 flex items-start gap-3 shadow-2xl backdrop-blur-md ${SEVERITY_STYLES[alert.severity]}`}
         >
           <span aria-hidden="true" className="text-xl shrink-0 mt-0.5">
             {SEVERITY_ICONS[alert.severity]}
@@ -52,6 +62,7 @@ export const AlertBanner = memo(function AlertBanner({ alerts, onDismiss }: Aler
             <p className="text-xs opacity-60 mt-1">
               {new Date(alert.timestamp).toLocaleTimeString()}
               {alert.zoneId ? ` · Zone ${alert.zoneId}` : ''}
+              {alert.eventId ? ` · Event ${alert.eventId}` : ''}
             </p>
           </div>
           <button

@@ -1,7 +1,7 @@
 // ============================================================
 // src/services/firebaseService.ts
 // Firebase Auth + Firestore wrappers — per-user data isolation
-// Per SECURITY.md §3 — scoped via firestore.rules
+// Scoped to authenticated user uid for event plans and snapshots
 // ============================================================
 
 import {
@@ -19,7 +19,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { auth, db } from '@/config/firebaseConfig';
-import { MatchDaySnapshot } from '@/types';
+import { EventSnapshot } from '@/types';
 
 // ----- Auth -----
 
@@ -37,40 +37,40 @@ export async function signOut(): Promise<void> {
   await fbSignOut(auth);
 }
 
-// ----- Firestore -----
+// ----- Firestore (Per-User Scoped) -----
 
-function snapshotsCollection(uid: string) {
-  return collection(db, 'users', uid, 'snapshots');
+function userEventsCollection(uid: string) {
+  return collection(db, 'users', uid, 'events');
 }
 
-export async function syncSnapshot(
+export async function syncEventSnapshot(
   uid: string,
-  snapshot: MatchDaySnapshot
+  snapshot: EventSnapshot
 ): Promise<void> {
-  const ref = doc(snapshotsCollection(uid), snapshot.id);
+  const ref = doc(userEventsCollection(uid), snapshot.id);
   await setDoc(ref, snapshot);
 }
 
-export async function fetchSnapshots(uid: string): Promise<MatchDaySnapshot[]> {
-  const colRef = snapshotsCollection(uid);
+export async function fetchEventSnapshots(uid: string): Promise<EventSnapshot[]> {
+  const colRef = userEventsCollection(uid);
   const snap = await getDocs(colRef);
-  return snap.docs.map((d) => d.data() as MatchDaySnapshot);
+  return snap.docs.map((d) => d.data() as EventSnapshot);
 }
 
-export async function fetchSnapshot(
+export async function fetchEventSnapshot(
   uid: string,
   snapshotId: string
-): Promise<MatchDaySnapshot | null> {
-  const ref = doc(snapshotsCollection(uid), snapshotId);
+): Promise<EventSnapshot | null> {
+  const ref = doc(userEventsCollection(uid), snapshotId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
-  return snap.data() as MatchDaySnapshot;
+  return snap.data() as EventSnapshot;
 }
 
-export async function deleteFirestoreSnapshot(
+export async function deleteFirestoreEventSnapshot(
   uid: string,
   snapshotId: string
 ): Promise<void> {
-  const ref = doc(snapshotsCollection(uid), snapshotId);
+  const ref = doc(userEventsCollection(uid), snapshotId);
   await deleteDoc(ref);
 }

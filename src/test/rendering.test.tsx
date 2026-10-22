@@ -1,256 +1,293 @@
 // ============================================================
 // src/test/rendering.test.tsx
-// JSDOM React component rendering tests
-// Per TESTING.md §1.4 — React Component Layout Rendering
+// JSDOM React component layout and rendering verification
+// Verifies all core feature components render without crashing
 // ============================================================
 
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { CrowdAnalytics } from '@/components/Dashboard/CrowdAnalytics';
-import { AIInsightsPanel } from '@/components/Dashboard/AIInsightsPanel';
-import { VenueNavigator } from '@/components/Navigation/VenueNavigator';
-import { VolunteerCommandCenter } from '@/components/Volunteer/VolunteerCommandCenter';
-import { TransportOptimizer } from '@/components/Transport/TransportOptimizer';
-import { SustainabilityDashboard } from '@/components/Sustainability/SustainabilityDashboard';
-import { ZoneInputForm } from '@/components/shared/ZoneInputForm';
+import { EventDashboard } from '@/components/Dashboard/EventDashboard';
+import { AIPlanningAssistant } from '@/components/Assistant/AIPlanningAssistant';
+import { BudgetManager } from '@/components/Budget/BudgetManager';
+import { TimelineSchedule } from '@/components/Timeline/TimelineSchedule';
+import { VendorChecklist } from '@/components/Vendors/VendorChecklist';
+import { PersonalizedIdeas } from '@/components/Ideas/PersonalizedIdeas';
+import { MultilingualAssistant } from '@/components/Multilingual/MultilingualAssistant';
 import { AlertBanner } from '@/components/shared/AlertBanner';
-import {
-  ZoneData,
-  CrowdProfile,
-  DensityLevel,
-  AlertSeverity,
-  StadiumAlert,
-  AccessibilityMode,
-  RouteOption,
-  WayfindingSession,
-  Checkpoint,
-} from '@/types';
+import { AppContextProvider } from '@/context/AppContext';
+import { EventItem, EventType, EventStatus, AlertSeverity } from '@/types';
 
-// ── Helpers ──────────────────────────────────────────────────
-const mockZone: ZoneData = {
-  zoneId: 'Z1', zoneName: 'North Stand', occupancy: 12000, capacity: 20000,
-  ingressRate: 200, egressRate: 50, queueLength: 120, serviceRate: 40, lastUpdated: Date.now(),
+const mockEvent: EventItem = {
+  id: 'test-evt-1',
+  title: 'Sarah & Alex Wedding Celebration',
+  eventType: EventType.Wedding,
+  date: '2026-09-18',
+  location: 'San Francisco, CA',
+  guestCount: 150,
+  totalBudget: 35000,
+  status: EventStatus.Planning,
+  preferences: {
+    themePreference: 'Botanical Garden',
+    venuePreference: 'Outdoor garden pavilion',
+    dietaryRequirements: ['Vegetarian'],
+    accessibilityRequirements: ['Step-Free Access'],
+  },
+  createdAt: Date.now(),
+  lastUpdated: Date.now(),
 };
 
-const mockProfile: CrowdProfile = {
-  zoneId: 'Z1', densityLevel: DensityLevel.High, densityPercent: 60,
-  flowRate: 150, waitTimeMinutes: 3, isAtRisk: false,
-};
-
-const mockSession: WayfindingSession = {
-  fromNodeId: 'gate-a', toNodeId: 'north-blk',
-  activeMode: AccessibilityMode.Standard, selectedRoute: null, isActive: false,
-};
-
-const mockRoute: RouteOption = {
-  mode: AccessibilityMode.Standard, waypoints: ['gate-a', 'lobby', 'concourse', 'north-blk'],
-  totalDistanceMeters: 230, estimatedMinutes: 3, elevatorRequired: false, restAreaCount: 1,
-};
-
-const mockCheckpoints: Checkpoint[] = [
-  { id: 'cp-1', label: 'Meet at lobby', nodeId: 'lobby', timestamp: Date.now() },
-];
-
-// ── Crowd Analytics ───────────────────────────────────────────
-describe('CrowdAnalytics rendering', () => {
-  it('renders the heatmap section header', () => {
+// ── 1. EventDashboard Rendering ───────────────────────────────
+describe('EventDashboard Rendering', () => {
+  it('renders event title and location in header', () => {
     render(
-      <CrowdAnalytics
-        zones={[mockZone]}
-        crowdProfiles={[mockProfile]}
-        onUpdateZone={() => {}}
-      />
+      <AppContextProvider>
+        <EventDashboard
+          event={mockEvent}
+          events={[mockEvent]}
+          onSelectEvent={() => {}}
+          onNavigateTab={() => {}}
+        />
+      </AppContextProvider>
     );
-    expect(screen.getByText(/Live Crowd Heatmap/i)).toBeInTheDocument();
+    expect(screen.getByText('Sarah & Alex Wedding Celebration')).toBeInTheDocument();
+    expect(screen.getByText(/San Francisco, CA/i)).toBeInTheDocument();
   });
 
-  it('renders zone name in density card', () => {
+  it('renders key performance metrics cards (budget, countdown, vendors)', () => {
     render(
-      <CrowdAnalytics
-        zones={[mockZone]}
-        crowdProfiles={[mockProfile]}
-        onUpdateZone={() => {}}
-      />
+      <AppContextProvider>
+        <EventDashboard
+          event={mockEvent}
+          events={[mockEvent]}
+          onSelectEvent={() => {}}
+          onNavigateTab={() => {}}
+        />
+      </AppContextProvider>
     );
-    // North Stand appears in both zone card and sr-only list
-    const elements = screen.getAllByText('North Stand');
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getByText(/Remaining Budget/i)).toBeInTheDocument();
+    expect(screen.getByText(/Vendors Ready/i)).toBeInTheDocument();
+    expect(screen.getByText(/Timeline Milestones/i)).toBeInTheDocument();
   });
 
-  it('renders sr-only screen reader heatmap description', () => {
+  it('renders empty state when no event is provided', () => {
     render(
-      <CrowdAnalytics
-        zones={[mockZone]}
-        crowdProfiles={[mockProfile]}
-        onUpdateZone={() => {}}
-      />
+      <AppContextProvider>
+        <EventDashboard
+          event={null}
+          events={[]}
+          onSelectEvent={() => {}}
+          onNavigateTab={() => {}}
+        />
+      </AppContextProvider>
     );
-    // sr-only list is visually hidden but present in DOM
-    const srList = document.querySelector('[aria-label="Crowd density heatmap description"]');
-    expect(srList).not.toBeNull();
-  });
-
-  it('shows density percent in zone card', () => {
-    render(
-      <CrowdAnalytics
-        zones={[mockZone]}
-        crowdProfiles={[mockProfile]}
-        onUpdateZone={() => {}}
-      />
-    );
-    // 60 appears in SVG and sr-only list; check for percentage text
-    const all60 = screen.getAllByText(/60/i);
-    expect(all60.length).toBeGreaterThan(0);
+    expect(screen.getByText(/No Event Selected/i)).toBeInTheDocument();
+    expect(screen.getByText(/Launch AI Planning Assistant/i)).toBeInTheDocument();
   });
 });
 
-// ── AI Insights Panel ─────────────────────────────────────────
-describe('AIInsightsPanel rendering', () => {
-  it('renders all match phase buttons', () => {
+// ── 2. AIPlanningAssistant Rendering ──────────────────────────
+describe('AIPlanningAssistant Rendering', () => {
+  it('renders requirements form and heading', () => {
     render(
-      <AIInsightsPanel insight={null} isLoading={false} onFetch={async () => {}} />
+      <AppContextProvider>
+        <AIPlanningAssistant />
+      </AppContextProvider>
     );
-    expect(screen.getByText(/Kickoff/i)).toBeInTheDocument();
-    expect(screen.getByText(/Pre-Match/i)).toBeInTheDocument();
-    expect(screen.getByText(/Halftime/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /GenAI Event Planning Assistant/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Event Type/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Event Date/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/City \/ Location/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Estimated Guests/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Total Budget/i)).toBeInTheDocument();
   });
 
-  it('renders generate button', () => {
+  it('renders dietary and accessibility preference buttons', () => {
     render(
-      <AIInsightsPanel insight={null} isLoading={false} onFetch={async () => {}} />
+      <AppContextProvider>
+        <AIPlanningAssistant />
+      </AppContextProvider>
     );
-    expect(screen.getByRole('button', { name: /generate ai/i })).toBeInTheDocument();
+    expect(screen.getByText(/Vegetarian/i)).toBeInTheDocument();
+    expect(screen.getByText(/Step-Free Access/i)).toBeInTheDocument();
   });
 
-  it('shows loading spinner when isLoading=true', () => {
+  it('renders generate plan submission button', () => {
     render(
-      <AIInsightsPanel insight={null} isLoading={true} onFetch={async () => {}} />
+      <AppContextProvider>
+        <AIPlanningAssistant />
+      </AppContextProvider>
     );
-    expect(screen.getByText(/Generating Intelligence/i)).toBeInTheDocument();
+    const btn = screen.getByRole('button', { name: /Generate Personalized Plan/i });
+    expect(btn).toBeInTheDocument();
   });
+});
 
-  it('shows cached badge when insight is cached', () => {
+// ── 3. BudgetManager Rendering ────────────────────────────────
+describe('BudgetManager Rendering', () => {
+  it('renders budget overview cards and total budget', () => {
     render(
-      <AIInsightsPanel
-        insight={{ markdown: '## Test', cached: true, generatedAt: Date.now() }}
-        isLoading={false}
-        onFetch={async () => {}}
-      />
+      <AppContextProvider>
+        <BudgetManager event={mockEvent} />
+      </AppContextProvider>
     );
-    expect(screen.getByText(/Cached/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Event Budget Manager/i })).toBeInTheDocument();
+    expect(screen.getByText(/Total Planned Budget/i)).toBeInTheDocument();
+    expect(screen.getByText(/Remaining Balance/i)).toBeInTheDocument();
+  });
+
+  it('renders add new expense item form controls', () => {
+    render(
+      <AppContextProvider>
+        <BudgetManager event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByLabelText(/Item Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Estimated/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Actual Spent/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Add Expense Item/i })).toBeInTheDocument();
+  });
+
+  it('renders itemized expenses table', () => {
+    render(
+      <AppContextProvider>
+        <BudgetManager event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByText(/Itemized Expenses/i)).toBeInTheDocument();
   });
 });
 
-// ── Navigation Panel ──────────────────────────────────────────
-describe('VenueNavigator rendering', () => {
-  const navProps = {
-    session: mockSession,
-    routes: [mockRoute],
-    checkpoints: mockCheckpoints,
-    setFrom: () => {},
-    setTo: () => {},
-    setMode: () => {},
-    startNavigation: () => {},
-    endNavigation: () => {},
-    addCheckpoint: () => {},
-    deleteCheckpoint: () => {},
-    clearCheckpoints: () => {},
-  };
-
-  it('renders heading', () => {
-    render(<VenueNavigator {...navProps} />);
-    expect(screen.getByText(/Intelligent Venue Navigation/i)).toBeInTheDocument();
+// ── 4. TimelineSchedule Rendering ─────────────────────────────
+describe('TimelineSchedule Rendering', () => {
+  it('renders countdown and progress overview', () => {
+    render(
+      <AppContextProvider>
+        <TimelineSchedule event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByRole('heading', { name: /Event Timeline & Scheduling/i })).toBeInTheDocument();
+    expect(screen.getByText(/Countdown to Event/i)).toBeInTheDocument();
+    expect(screen.getByText(/Milestones Completed/i)).toBeInTheDocument();
   });
 
-  it('renders accessibility mode buttons', () => {
-    render(<VenueNavigator {...navProps} />);
-    expect(screen.getByText(/Wheelchair/i)).toBeInTheDocument();
-    expect(screen.getByText(/Visual Aid/i)).toBeInTheDocument();
+  it('renders milestone input form', () => {
+    render(
+      <AppContextProvider>
+        <TimelineSchedule event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByLabelText(/Task Title/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Target Deadline/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Add Milestone/i })).toBeInTheDocument();
   });
 
-  it('renders saved checkpoint label', () => {
-    render(<VenueNavigator {...navProps} />);
-    expect(screen.getByText('Meet at lobby')).toBeInTheDocument();
-  });
-
-  it('renders route with distance info', () => {
-    render(<VenueNavigator {...navProps} />);
-    expect(screen.getByText(/230m/i)).toBeInTheDocument();
+  it('renders day-of program schedule section', () => {
+    render(
+      <AppContextProvider>
+        <TimelineSchedule event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByText(/Event-Day Program Schedule/i)).toBeInTheDocument();
   });
 });
 
-// ── Transport Optimizer ───────────────────────────────────────
-describe('TransportOptimizer rendering', () => {
-  it('renders departure recommendation', () => {
-    render(<TransportOptimizer />);
-    expect(screen.getByText(/Smart Departure Recommendation/i)).toBeInTheDocument();
+// ── 5. VendorChecklist Rendering ──────────────────────────────
+describe('VendorChecklist Rendering', () => {
+  it('renders vendor management heading and status overview', () => {
+    render(
+      <AppContextProvider>
+        <VendorChecklist event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByRole('heading', { name: /Vendor Checklist & Coordination/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Confirmed/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Contacted/i).length).toBeGreaterThan(0);
   });
 
-  it('renders metro section', () => {
-    render(<TransportOptimizer />);
-    expect(screen.getByText(/Metro/i)).toBeInTheDocument();
-  });
-});
-
-// ── Sustainability Dashboard ──────────────────────────────────
-describe('SustainabilityDashboard rendering', () => {
-  it('renders green score heading', () => {
-    render(<SustainabilityDashboard />);
-    expect(screen.getByText(/Composite Green Score/i)).toBeInTheDocument();
-  });
-
-  it('renders waste diversion card', () => {
-    render(<SustainabilityDashboard />);
-    expect(screen.getByText(/Waste Diversion/i)).toBeInTheDocument();
-  });
-
-  it('renders energy usage card', () => {
-    render(<SustainabilityDashboard />);
-    expect(screen.getByText(/Energy Usage/i)).toBeInTheDocument();
+  it('renders add vendor form fields', () => {
+    render(
+      <AppContextProvider>
+        <VendorChecklist event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByLabelText(/Vendor \/ Service Name/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Add Vendor Item/i })).toBeInTheDocument();
   });
 });
 
-// ── Volunteer Command Center ──────────────────────────────────
-describe('VolunteerCommandCenter rendering', () => {
-  it('renders task queue heading', () => {
-    render(<VolunteerCommandCenter />);
-    expect(screen.getByText(/AI-Prioritized Task Queue/i)).toBeInTheDocument();
+// ── 6. PersonalizedIdeas Rendering ────────────────────────────
+describe('PersonalizedIdeas Rendering', () => {
+  it('renders category filter tabs', () => {
+    render(
+      <AppContextProvider>
+        <PersonalizedIdeas event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByRole('heading', { name: /Personalized Event Ideas & Inspiration/i })).toBeInTheDocument();
+    expect(screen.getByText(/All Ideas/i)).toBeInTheDocument();
+    expect(screen.getByText(/Themes & Styling/i)).toBeInTheDocument();
+    expect(screen.getByText(/Smart Budget Tips/i)).toBeInTheDocument();
   });
 
-  it('renders staff roster section', () => {
-    render(<VolunteerCommandCenter />);
-    expect(screen.getByText(/Zone Staff Roster/i)).toBeInTheDocument();
-  });
-});
-
-// ── Shared Components ─────────────────────────────────────────
-describe('ZoneInputForm rendering', () => {
-  it('renders zone name in legend', () => {
-    render(<ZoneInputForm zone={mockZone} onUpdate={() => {}} />);
-    expect(screen.getByText('North Stand')).toBeInTheDocument();
-  });
-
-  it('renders labeled occupancy input with for-id linking', () => {
-    render(<ZoneInputForm zone={mockZone} onUpdate={() => {}} />);
-    const label = screen.getByText(/Current Occupancy/i);
-    expect(label).toBeInTheDocument();
+  it('renders custom idea creation form', () => {
+    render(
+      <AppContextProvider>
+        <PersonalizedIdeas event={mockEvent} />
+      </AppContextProvider>
+    );
+    expect(screen.getByLabelText(/^Title/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Add Idea/i })).toBeInTheDocument();
   });
 });
 
-describe('AlertBanner rendering', () => {
-  it('renders nothing when all alerts are dismissed', () => {
-    const alerts: StadiumAlert[] = [
-      { id: 'a1', severity: AlertSeverity.Warning, title: 'Test', message: 'msg', timestamp: Date.now(), dismissed: true },
+// ── 7. MultilingualAssistant Rendering ────────────────────────
+describe('MultilingualAssistant Rendering', () => {
+  it('renders multilingual header and text input', () => {
+    render(<MultilingualAssistant />);
+    expect(screen.getByText(/Multilingual Invitations & Communication/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Text to Translate/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Translate to/i })).toBeInTheDocument();
+  });
+
+  it('renders language selector options', () => {
+    render(<MultilingualAssistant />);
+    expect(screen.getByText('العربية')).toBeInTheDocument();
+    expect(screen.getByText('Español')).toBeInTheDocument();
+    expect(screen.getByText('Français')).toBeInTheDocument();
+  });
+});
+
+// ── 8. AlertBanner Rendering ──────────────────────────────────
+describe('AlertBanner Rendering', () => {
+  it('renders warning alert with accessible role', () => {
+    const alerts = [
+      {
+        id: 'alt-1',
+        severity: AlertSeverity.Warning,
+        title: 'Budget Alert',
+        message: 'Spending approaching limit',
+        timestamp: Date.now(),
+        dismissed: false,
+      },
+    ];
+    render(<AlertBanner alerts={alerts} onDismiss={() => {}} />);
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByText('Budget Alert')).toBeInTheDocument();
+    expect(screen.getByText('Spending approaching limit')).toBeInTheDocument();
+  });
+
+  it('does not render when all alerts are dismissed', () => {
+    const alerts = [
+      {
+        id: 'alt-1',
+        severity: AlertSeverity.Info,
+        title: 'Notice',
+        message: 'Dismissed',
+        timestamp: Date.now(),
+        dismissed: true,
+      },
     ];
     const { container } = render(<AlertBanner alerts={alerts} onDismiss={() => {}} />);
     expect(container.firstChild).toBeNull();
-  });
-
-  it('renders active alert', () => {
-    const alerts: StadiumAlert[] = [
-      { id: 'a1', severity: AlertSeverity.Critical, title: 'Zone Critical', message: 'High occupancy', timestamp: Date.now(), dismissed: false },
-    ];
-    render(<AlertBanner alerts={alerts} onDismiss={() => {}} />);
-    expect(screen.getByText('Zone Critical')).toBeInTheDocument();
   });
 });
