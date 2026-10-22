@@ -6,14 +6,27 @@
 import { useState, useCallback } from 'react';
 import { AIPlanRequest, AIPlanResponse } from '@/types';
 
+/**
+ * Return interface for the useEventPlanning hook.
+ */
 export interface UseEventPlanningReturn {
+  /** Indicates whether an AI generation request is currently inflight */
   isLoading: boolean;
+  /** Error message string if generation failed, or null */
   error: string | null;
+  /** Generated AI plan response object, or null */
   plan: AIPlanResponse | null;
+  /** Function to trigger plan generation via backend API */
   generatePlan: (request: AIPlanRequest) => Promise<AIPlanResponse | null>;
+  /** Clears current plan and error state */
   resetPlan: () => void;
 }
 
+/**
+ * Custom React hook for requesting, managing, and applying AI-generated event plans.
+ *
+ * @returns State and functions for generating event plans
+ */
 export function useEventPlanning(): UseEventPlanningReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

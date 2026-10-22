@@ -17,7 +17,7 @@ import {
   VendorStatus,
 } from '@/types';
 import { useEventPlanning } from '@/hooks/useEventPlanning';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext } from '@/hooks/useAppContext';
 import {
   saveEventBudget,
   saveEventTimeline,
@@ -243,7 +243,7 @@ export const AIPlanningAssistant = memo(function AIPlanningAssistant({
           <h3 className="text-sm font-bold text-white uppercase tracking-wider text-indigo-400">
             1. Event Specifications & Guest Parameters
           </h3>
-          <span className="text-[11px] text-slate-500">* Required fields</span>
+          <span className="text-[11px] text-slate-400">* Required fields</span>
         </div>
 
         {/* Event Type & Date */}
@@ -489,7 +489,7 @@ export const AIPlanningAssistant = memo(function AIPlanningAssistant({
                   AI Plan Generated
                 </span>
                 {plan.cached && (
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-slate-400">
                     (Served from in-memory cache)
                   </span>
                 )}
@@ -579,7 +579,7 @@ export const AIPlanningAssistant = memo(function AIPlanningAssistant({
                   </div>
                   <div className="text-right shrink-0">
                     <span className="font-bold text-emerald-400 block">${v.estimatedCost.toLocaleString()}</span>
-                    <span className="text-[10px] text-slate-500 font-semibold">{v.priority}</span>
+                    <span className="text-[10px] text-slate-400 font-semibold">{v.priority}</span>
                   </div>
                 </div>
               ))}

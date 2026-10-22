@@ -136,7 +136,7 @@ export const VolunteerCommandCenter = memo(function VolunteerCommandCenter() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <label htmlFor={`task-${task.id}`} className={`font-semibold text-sm ${task.completed ? 'line-through text-slate-500' : 'text-white'}`}>
+                      <label htmlFor={`task-${task.id}`} className={`font-semibold text-sm ${task.completed ? 'line-through text-slate-400' : 'text-white'}`}>
                         {task.title}
                       </label>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${PRIORITY_BADGE[task.priority]}`}>

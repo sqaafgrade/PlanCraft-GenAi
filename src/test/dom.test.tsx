@@ -14,6 +14,7 @@ import { AIPlanningAssistant } from '@/components/Assistant/AIPlanningAssistant'
 import { MultilingualAssistant } from '@/components/Multilingual/MultilingualAssistant';
 import { AlertBanner } from '@/components/shared/AlertBanner';
 import { AppContextProvider } from '@/context/AppContext';
+import { useAppContext } from '@/hooks/useAppContext';
 import { EventItem, EventType, EventStatus, AlertSeverity } from '@/types';
 import App from '../App';
 
@@ -274,5 +275,13 @@ describe('Accessibility Audits — WCAG 2.2 AA Conformance', () => {
     expect(veganBtn).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(veganBtn);
     expect(veganBtn).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('throws an error when useAppContext is used outside AppContextProvider', () => {
+    function BrokenComponent() {
+      useAppContext();
+      return <div>Broken</div>;
+    }
+    expect(() => render(<BrokenComponent />)).toThrow('useAppContext must be used within AppContextProvider');
   });
 });

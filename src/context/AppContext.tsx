@@ -4,8 +4,6 @@
 // ============================================================
 
 import {
-  createContext,
-  useContext,
   useState,
   useCallback,
   useEffect,
@@ -26,6 +24,7 @@ import {
   loadActiveEventId,
   saveActiveEventId,
 } from '@/services/storageService';
+import { AppContext } from './AppContextDef';
 
 const DEFAULT_EVENT: EventItem = {
   id: 'evt-default-1',
@@ -47,25 +46,6 @@ const DEFAULT_EVENT: EventItem = {
   createdAt: Date.now() - 86400000 * 14,
   lastUpdated: Date.now(),
 };
-
-interface AppContextValue {
-  user: User | null;
-  setUser: (user: User | null) => void;
-  activeTab: TabId;
-  setActiveTab: (tab: TabId) => void;
-  accessibilityMode: AccessibilityMode;
-  setAccessibilityMode: (mode: AccessibilityMode) => void;
-  language: LanguageCode;
-  setLanguage: (lang: LanguageCode) => void;
-  events: EventItem[];
-  activeEvent: EventItem | null;
-  setActiveEvent: (event: EventItem | null) => void;
-  createEvent: (params: Omit<EventItem, 'id' | 'createdAt' | 'lastUpdated'>) => EventItem;
-  updateEvent: (id: string, updates: Partial<EventItem>) => void;
-  deleteEvent: (id: string) => void;
-}
-
-const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -168,11 +148,4 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       {children}
     </AppContext.Provider>
   );
-}
-
-// eslint-disable-next-line react/only-export-components
-export function useAppContext(): AppContextValue {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error('useAppContext must be used within AppContextProvider');
-  return ctx;
 }

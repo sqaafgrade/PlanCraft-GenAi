@@ -139,7 +139,7 @@ export const TimelineSchedule = memo(function TimelineSchedule({ event }: Timeli
             <span className="text-3xl font-black text-white">{daysRemaining}</span>
             <span className="text-xs text-slate-400 font-medium">Days Remaining</span>
           </div>
-          <span className="text-[11px] text-slate-500 mt-1 block">Event Target: {event?.date}</span>
+          <span className="text-[11px] text-slate-400 mt-1 block">Event Target: {event?.date}</span>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg md:col-span-2 flex flex-col justify-between">
@@ -157,7 +157,7 @@ export const TimelineSchedule = memo(function TimelineSchedule({ event }: Timeli
               />
             </div>
           </div>
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-xs text-slate-400 mt-2">
             Sequential task milestones ensure critical contracts, invitations, and tastings happen in order.
           </p>
         </div>
@@ -252,7 +252,7 @@ export const TimelineSchedule = memo(function TimelineSchedule({ event }: Timeli
         </h3>
 
         {tasks.length === 0 ? (
-          <p className="text-xs text-slate-500 text-center py-8">
+          <p className="text-xs text-slate-400 text-center py-8">
             No milestones planned yet. Click "Reset to Recommended Milestones" or add your own above.
           </p>
         ) : (
@@ -278,7 +278,7 @@ export const TimelineSchedule = memo(function TimelineSchedule({ event }: Timeli
                   <div>
                     <span
                       className={`font-semibold text-xs ${
-                        task.completed ? 'line-through text-slate-500' : 'text-slate-100'
+                        task.completed ? 'line-through text-slate-400' : 'text-slate-100'
                       }`}
                     >
                       {task.title}
@@ -314,7 +314,7 @@ export const TimelineSchedule = memo(function TimelineSchedule({ event }: Timeli
                     type="button"
                     aria-label={`Delete task ${task.title}`}
                     onClick={() => deleteTask(task.id)}
-                    className="text-slate-500 hover:text-rose-400 transition-colors focus:outline-none"
+                    className="text-slate-400 hover:text-rose-400 transition-colors focus:outline-none"
                   >
                     ✕
                   </button>
@@ -331,7 +331,7 @@ export const TimelineSchedule = memo(function TimelineSchedule({ event }: Timeli
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <span>⏰</span> Event-Day Program Schedule
           </h3>
-          <span className="text-xs text-slate-500">{daySchedule.length} activities scheduled</span>
+          <span className="text-xs text-slate-400">{daySchedule.length} activities scheduled</span>
         </div>
 
         {/* Add Day Activity Form */}
@@ -391,7 +391,7 @@ export const TimelineSchedule = memo(function TimelineSchedule({ event }: Timeli
                 type="button"
                 aria-label={`Remove schedule item ${item.activity}`}
                 onClick={() => handleDeleteScheduleItem(item.id)}
-                className="text-slate-500 hover:text-rose-400 transition-colors focus:outline-none"
+                className="text-slate-400 hover:text-rose-400 transition-colors focus:outline-none"
               >
                 ✕
               </button>

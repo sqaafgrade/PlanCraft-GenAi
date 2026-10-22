@@ -7,6 +7,7 @@
 export const ALLOWED_ORIGINS: readonly string[] = [
   'http://localhost:5173',
   'http://localhost:3001',
+  'https://plancraft-genai.onrender.com',
   'https://smartstadium.web.app',
   'https://smartstadium.firebaseapp.com',
   'https://genai-planner.web.app',

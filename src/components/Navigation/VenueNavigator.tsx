@@ -91,7 +91,7 @@ export const VenueNavigator = memo(function VenueNavigator({
                 </li>
               ))}
               {filteredNodes.length === 0 && (
-                <li className="px-3 py-2 text-sm text-slate-500" role="option" aria-selected={false}>No results found</li>
+                <li className="px-3 py-2 text-sm text-slate-400" role="option" aria-selected={false}>No results found</li>
               )}
             </ul>
           )}
@@ -153,7 +153,7 @@ export const VenueNavigator = memo(function VenueNavigator({
               </button>
             ))}
           </div>
-          <p className="text-xs text-slate-500 mt-1.5" aria-live="polite">
+          <p className="text-xs text-slate-400 mt-1.5" aria-live="polite">
             {MODE_DESCRIPTIONS[session.activeMode]}
           </p>
         </fieldset>
@@ -294,7 +294,7 @@ export const VenueNavigator = memo(function VenueNavigator({
         </div>
 
         {checkpoints.length === 0 ? (
-          <p className="text-slate-500 text-sm text-center py-4">No checkpoints saved.</p>
+          <p className="text-slate-400 text-sm text-center py-4">No checkpoints saved.</p>
         ) : (
           <ul className="space-y-2" aria-label="Saved checkpoints">
             {checkpoints.map((cp) => {
@@ -309,7 +309,7 @@ export const VenueNavigator = memo(function VenueNavigator({
                   <button
                     type="button"
                     onClick={() => deleteCheckpoint(cp.id)}
-                    className="text-slate-500 hover:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
+                    className="text-slate-400 hover:text-red-400 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
                     aria-label={`Delete checkpoint ${cp.label}`}
                   >
                     ✕

@@ -158,7 +158,7 @@ export const EventDashboard = memo(function EventDashboard({
               {isPast ? 'Days Ago' : 'Days Left'}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Event Date: {event.date}
           </p>
         </div>
@@ -178,7 +178,7 @@ export const EventDashboard = memo(function EventDashboard({
               ${summary.remainingBudget.toLocaleString()}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Total Planned: ${summary.totalBudget.toLocaleString()}
           </p>
         </div>
@@ -197,7 +197,7 @@ export const EventDashboard = memo(function EventDashboard({
               ({progress.completed}/{progress.total} Done)
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             {progress.confirmed} confirmed · {progress.contacted} contacted
           </p>
         </div>
@@ -216,7 +216,7 @@ export const EventDashboard = memo(function EventDashboard({
               Tasks
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             {nextUpcomingTask ? `Next: ${nextUpcomingTask.title.slice(0, 24)}...` : 'All tasks completed!'}
           </p>
         </div>
@@ -326,7 +326,7 @@ export const EventDashboard = memo(function EventDashboard({
                     <div>
                       <p
                         className={`font-semibold ${
-                          task.completed ? 'line-through text-slate-500' : 'text-slate-200'
+                          task.completed ? 'line-through text-slate-400' : 'text-slate-200'
                         }`}
                       >
                         {task.title}

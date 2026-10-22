@@ -4,7 +4,7 @@
 // boundary rejection, cache key generation, and HTTP API endpoints
 // ============================================================
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   ALLOWED_ORIGINS,
   validatePlanPayload,
@@ -26,6 +26,10 @@ describe('CORS Origin Validation', () => {
 
   it('allows Firebase web.app domain', () => {
     expect(ALLOWED_ORIGINS).toContain('https://smartstadium.web.app');
+  });
+
+  it('allows Render production domain', () => {
+    expect(ALLOWED_ORIGINS).toContain('https://plancraft-genai.onrender.com');
   });
 
   it('rejects arbitrary external origins not in allowlist', () => {
@@ -174,11 +178,21 @@ describe('sanitizeString — Prompt Hardening', () => {
 // ── 6. Live HTTP API Endpoint Integrations ─────────────────────
 describe('HTTP API Endpoints', () => {
   const serverUrl = 'http://localhost:3001';
+  let serverInstance: { close: (cb?: () => void) => void } | undefined;
 
   beforeAll(async () => {
     const serverPath = '../../server.ts';
-    await import(/* @vite-ignore */ serverPath);
+    const mod = await import(/* @vite-ignore */ serverPath);
+    serverInstance = mod.server;
     await new Promise((resolve) => setTimeout(resolve, 200));
+  });
+
+  afterAll(async () => {
+    if (serverInstance && typeof serverInstance.close === 'function') {
+      await new Promise<void>((resolve) => {
+        serverInstance!.close(() => resolve());
+      });
+    }
   });
 
   it('GET /api/health returns status 200 and cache size', async () => {
@@ -268,6 +282,13 @@ describe('HTTP API Endpoints', () => {
     expect(data.translatedText).toBeDefined();
     expect(data.targetLanguage).toBe('es');
   }, 35000);
+
+  it('GET /api/nonexistent-route returns 404 JSON', async () => {
+    const res = await fetch(`${serverUrl}/api/nonexistent-route`);
+    expect(res.status).toBe(404);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toBe('Endpoint not found');
+  });
 
   it('GET /some-random-route serves SPA fallback', async () => {
     const res = await fetch(`${serverUrl}/some-random-route`);

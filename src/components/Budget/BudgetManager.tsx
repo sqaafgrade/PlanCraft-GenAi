@@ -119,7 +119,7 @@ export const BudgetManager = memo(function BudgetManager({ event }: BudgetManage
           <span className="text-2xl font-black text-white mt-1 block">
             ${summary.totalBudget.toLocaleString()}
           </span>
-          <span className="text-[11px] text-slate-500 mt-1 block">Baseline Event Allocation</span>
+          <span className="text-[11px] text-slate-400 mt-1 block">Baseline Event Allocation</span>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
@@ -127,7 +127,7 @@ export const BudgetManager = memo(function BudgetManager({ event }: BudgetManage
           <span className="text-2xl font-black text-indigo-300 mt-1 block">
             ${summary.totalEstimated.toLocaleString()}
           </span>
-          <span className="text-[11px] text-slate-500 mt-1 block">Sum of item estimates</span>
+          <span className="text-[11px] text-slate-400 mt-1 block">Sum of item estimates</span>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg">
@@ -135,7 +135,7 @@ export const BudgetManager = memo(function BudgetManager({ event }: BudgetManage
           <span className="text-2xl font-black text-white mt-1 block">
             ${summary.totalActual.toLocaleString()}
           </span>
-          <span className="text-[11px] text-slate-500 mt-1 block">
+          <span className="text-[11px] text-slate-400 mt-1 block">
             Utilization: {summary.utilizationPercent}%
           </span>
         </div>
@@ -149,7 +149,7 @@ export const BudgetManager = memo(function BudgetManager({ event }: BudgetManage
           >
             ${summary.remainingBudget.toLocaleString()}
           </span>
-          <span className="text-[11px] text-slate-500 mt-1 block">
+          <span className="text-[11px] text-slate-400 mt-1 block">
             Includes ${summary.contingencyAmount.toLocaleString()} contingency
           </span>
         </div>
@@ -278,7 +278,7 @@ export const BudgetManager = memo(function BudgetManager({ event }: BudgetManage
         </div>
 
         {filteredItems.length === 0 ? (
-          <p className="text-xs text-slate-500 text-center py-8">
+          <p className="text-xs text-slate-400 text-center py-8">
             No items in this category yet. Use the form above to add an expense item.
           </p>
         ) : (
@@ -327,7 +327,7 @@ export const BudgetManager = memo(function BudgetManager({ event }: BudgetManage
                         type="button"
                         aria-label={`Delete budget item ${item.name}`}
                         onClick={() => deleteItem(item.id)}
-                        className="text-slate-500 hover:text-rose-400 transition-colors focus:outline-none"
+                        className="text-slate-400 hover:text-rose-400 transition-colors focus:outline-none"
                       >
                         ✕
                       </button>

@@ -52,12 +52,12 @@ All six evaluation parameters (**Code Quality, Security, Efficiency, Testing, Ac
 
 ---
 
-## 6. Testing (148 Passing Tests — 100% Success)
-*   **Test Suite Growth:** Increased passing automated tests from **120 to 148** across 6 test suites in Vitest + JSDOM.
+## 6. Testing (158 Passing Tests — 100% Success)
+*   **Test Suite Growth:** Increased passing automated tests to **158** across 6 test suites in Vitest + JSDOM.
 *   **Full Spectrum Verification:**
     *   `src/test/event.test.ts` (39 tests): Budget calculations, category distribution, milestone dates, vendor progress, sustainability score, Dijkstra algorithm.
-    *   `src/test/api.test.ts` (27 tests): CORS origin checks, plan payload type guards, boundary parameters, SHA-256 cache keys, live HTTP endpoints.
+    *   `src/test/api.test.ts` (34 tests): CORS origin checks, Render production domain, plan payload type guards, boundary parameters, SHA-256 cache keys, prompt hardening, live HTTP endpoints & clean server teardown.
     *   `src/test/stadium.test.ts` (28 tests): Preserved baseline mathematical stability.
     *   `src/test/navigation.test.ts` (22 tests): Graph shortest-path, route mode filtering, checkpoint CRUD, storage service.
     *   `src/test/rendering.test.tsx` (20 tests): JSDOM layout rendering for all core components.
-    *   `src/test/dom.test.tsx` (12 tests): DOM event handling (inputs, checkboxes, category filters, language switching, alert dismissal).
+    *   `src/test/dom.test.tsx` (15 tests): DOM event handling (inputs, checkboxes, category filters, language switching, alert dismissal, WCAG landmarks, useAppContext hook invariant).

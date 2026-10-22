@@ -12,18 +12,38 @@ import {
 } from '@/lib/eventCompute';
 import { loadEventTimeline, saveEventTimeline } from '@/services/storageService';
 
+/**
+ * Return interface for the useEventTimeline hook.
+ */
 export interface UseEventTimelineReturn {
+  /** Ordered list of milestone tasks */
   tasks: TimelineTask[];
+  /** Integer count of days remaining until the event date */
   daysRemaining: number;
+  /** Number of completed tasks */
   completedCount: number;
+  /** Total count of tasks */
   totalCount: number;
+  /** Adds a new milestone task */
   addTask: (task: Omit<TimelineTask, 'id' | 'eventId' | 'isOverdue'>) => void;
+  /** Toggles task completion status */
   toggleTask: (id: string) => void;
+  /** Updates task fields by ID */
   updateTask: (id: string, updates: Partial<TimelineTask>) => void;
+  /** Deletes a task by ID */
   deleteTask: (id: string) => void;
+  /** Regenerates benchmark milestones for the target date and event type */
   regenerateMilestones: (eventDate: string, eventType: EventType) => void;
 }
 
+/**
+ * Custom React hook for tracking event timeline milestones, deadlines, and countdowns.
+ *
+ * @param eventId - The unique event ID
+ * @param eventDate - ISO format target date (YYYY-MM-DD)
+ * @param eventType - Event category for benchmark milestones
+ * @returns Milestone tasks, countdown metrics, and task mutation methods
+ */
 export function useEventTimeline(
   eventId: string,
   eventDate: string,

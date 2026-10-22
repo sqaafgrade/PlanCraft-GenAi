@@ -57,7 +57,7 @@ Cloud Sync & Local Isolation (Firebase Auth, Firestore per-user scoping, localSt
 | **Security Suite** | Helmet, CORS, Rate Limit | CSP headers, dynamic origin matching, 15KB payload limit, CWE-209 safe error handler |
 | **Caching Layer** | SHA-256 In-Memory Cache | 100-entry LRU cache preventing duplicate AI calls and token waste |
 | **Cloud Persistence** | Firebase Auth & Firestore | Per-user document isolation and secure cloud synchronization |
-| **Testing Framework** | Vitest + JSDOM + RTL | 148 automated unit, integration, and component rendering tests |
+| **Testing Framework** | Vitest + JSDOM + RTL | 158 automated unit, integration, and component rendering tests |
 | **Linter & Code Quality** | Oxlint | Modern Rust-based linter enforcing clean React hooks and TypeScript strictness |
 
 ---
@@ -151,18 +151,18 @@ npm run test:run
 
 **Test Suite Coverage Summary:**
 - Total Test Files: **6**
-- Total Automated Tests: **148**
-- Passing: **148**
+- Total Automated Tests: **158**
+- Passing: **158**
 - Failing: **0**
 
 | Test File | Tests | Focus Area |
 |---|---|---|
 | `src/test/event.test.ts` | 39 | Budget calculations, category distribution, milestone math, vendor progress, sustainability score, Dijkstra algorithm |
-| `src/test/api.test.ts` | 27 | CORS validation, plan payload type guards, boundary checks, SHA-256 hash keys, live HTTP endpoints |
+| `src/test/api.test.ts` | 34 | CORS validation, Render domain allowlist, payload type guards, boundary checks, SHA-256 hash keys, prompt hardening, live HTTP endpoints & clean teardown |
 | `src/test/stadium.test.ts` | 28 | Baseline mathematical stability, density thresholds, queue wait times, green composite formulas |
 | `src/test/navigation.test.ts` | 22 | Graph traversal, accessible route mode filtering, checkpoint CRUD, storage service |
 | `src/test/rendering.test.tsx` | 20 | Component layout rendering in JSDOM (Dashboard, Assistant, Budget, Timeline, Vendors, Ideas, Alerts) |
-| `src/test/dom.test.tsx` | 12 | User event interactions (form inputs, milestone checkboxes, category filters, language switches) |
+| `src/test/dom.test.tsx` | 15 | User event interactions (form inputs, milestone checkboxes, category filters, language switches, WCAG landmarks, useAppContext hook invariant) |
 
 ---
 

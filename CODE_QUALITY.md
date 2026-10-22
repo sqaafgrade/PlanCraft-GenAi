@@ -23,7 +23,7 @@ We maintain strict separation of concerns across atomic components, custom React
     *   `storageService.ts` — Safe JSON parsing, typed localStorage persistence scoped per event.
     *   `firebaseService.ts` — Per-user scoped Firestore synchronization and authentication.
 *   `src/types/` — Shared TypeScript declarations and enums (`EventType`, `BudgetCategory`, `VendorStatus`, `TaskPriority`, `AIPlanResponse`, `EventSnapshot`) with zero `any` annotations.
-*   `src/test/` — Unit and integration tests (148 tests across 6 suites running in Vitest + JSDOM).
+*   `src/test/` — Unit and integration tests (158 tests across 6 suites running in Vitest + JSDOM).
 
 ---
 

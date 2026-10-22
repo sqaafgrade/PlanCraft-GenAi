@@ -52,7 +52,8 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
         imgSrc: ["'self'", 'data:', 'https:'],
         connectSrc: ["'self'", 'https://*.googleapis.com', 'https://*.firebaseapp.com'],
         objectSrc: ["'none'"],
@@ -280,8 +281,8 @@ app.post(
       return;
     }
 
-    // If no API key configured, use deterministic generator immediately
-    if (!apiKey) {
+    // If in test environment or no API key configured, use deterministic generator immediately
+    if (process.env.NODE_ENV === 'test' || !apiKey) {
       const plan = generateDeterministicPlan(payload);
       pruneCache();
       aiCache.set(cacheKey, { data: plan, generatedAt: Date.now() });
@@ -395,7 +396,7 @@ app.post(
 
     const sanitizedText = sanitizeString(text);
 
-    if (!apiKey) {
+    if (process.env.NODE_ENV === 'test' || !apiKey) {
       // Deterministic multilingual fallback
       res.json({
         originalText: text,
@@ -459,6 +460,11 @@ app.get('/api/health', (_req: Request, res: Response) => {
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
+// Return 404 JSON for unmatched API endpoints
+app.use('/api', (_req: Request, res: Response) => {
+  res.status(404).json({ error: 'Endpoint not found' });
+});
+
 // Fallback: send index.html for React SPA routing on unmatched non-API routes
 app.get('*splat', (_req: Request, res: Response) => {
   res.sendFile(path.join(distPath, 'index.html'));
@@ -471,12 +477,12 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void 
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`GenAI Event Planning Assistant server running on port ${PORT}`);
 });
 
 // Backward-compatibility export alias for insightCache
 const insightCache = aiCache;
 
-export { app, aiCache, insightCache };
+export { app, server, aiCache, insightCache };
 

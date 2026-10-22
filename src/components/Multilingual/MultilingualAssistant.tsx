@@ -161,10 +161,10 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
             rows={4}
             maxLength={2000}
             className="w-full bg-slate-700/60 border border-slate-600/50 rounded-xl px-3 py-2 text-sm text-slate-100
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-500 resize-none"
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-400 resize-none"
             aria-label="Text to translate"
           />
-          <p className="text-xs text-slate-500 text-right mt-0.5">{inputText.length}/2000</p>
+          <p className="text-xs text-slate-400 text-right mt-0.5">{inputText.length}/2000</p>
         </div>
 
         <button
@@ -212,7 +212,7 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
             </div>
           )}
 
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-xs text-slate-400 mt-2">
             Translated at {new Date(result.timestamp).toLocaleTimeString()}
           </p>
         </div>

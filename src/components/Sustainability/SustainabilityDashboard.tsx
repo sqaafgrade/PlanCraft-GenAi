@@ -112,7 +112,7 @@ export const SustainabilityDashboard = memo(function SustainabilityDashboard() {
           <p className="text-sm text-slate-400 mt-0.5">
             {greenScore >= 75 ? '✅ Excellent sustainability performance' : greenScore >= 50 ? '⚠️ Room for improvement' : '🔴 Critical — action required'}
           </p>
-          <p className="text-xs text-slate-500 mt-1">Waste 40% · Energy 35% · Water 25%</p>
+          <p className="text-xs text-slate-400 mt-1">Waste 40% · Energy 35% · Water 25%</p>
         </div>
       </div>
 
@@ -126,7 +126,7 @@ export const SustainabilityDashboard = memo(function SustainabilityDashboard() {
             <div className="h-2 rounded-full bg-emerald-500 transition-all" style={{ width: `${metrics.wasteDiversionPercent}%` }} />
           </div>
           <Sparkline values={wasteHistory} color="#10b981" />
-          <label htmlFor="waste-slider" className="text-xs text-slate-500 mt-1 block">Adjust: {metrics.wasteDiversionPercent}%</label>
+          <label htmlFor="waste-slider" className="text-xs text-slate-400 mt-1 block">Adjust: {metrics.wasteDiversionPercent}%</label>
           <input id="waste-slider" type="range" min={0} max={100} value={metrics.wasteDiversionPercent}
             onChange={(e) => setMetrics((m) => ({ ...m, wasteDiversionPercent: +e.target.value }))}
             className="w-full mt-1 accent-emerald-500" aria-label="Waste diversion rate slider" />
@@ -141,7 +141,7 @@ export const SustainabilityDashboard = memo(function SustainabilityDashboard() {
             <div className="h-2 rounded-full bg-amber-500 transition-all" style={{ width: `${energyPercent}%` }} />
           </div>
           <Sparkline values={energyHistory.map((v) => v / 1000)} color="#f59e0b" />
-          <label htmlFor="energy-slider" className="text-xs text-slate-500 mt-1 block">Usage: {metrics.energyUsageKwh.toLocaleString()} kWh</label>
+          <label htmlFor="energy-slider" className="text-xs text-slate-400 mt-1 block">Usage: {metrics.energyUsageKwh.toLocaleString()} kWh</label>
           <input id="energy-slider" type="range" min={5000} max={30000} step={500} value={metrics.energyUsageKwh}
             onChange={(e) => setMetrics((m) => ({ ...m, energyUsageKwh: +e.target.value }))}
             className="w-full mt-1 accent-amber-500" aria-label="Energy usage slider" />
@@ -156,7 +156,7 @@ export const SustainabilityDashboard = memo(function SustainabilityDashboard() {
             <div className="h-2 rounded-full bg-sky-500 transition-all" style={{ width: `${waterPercent}%` }} />
           </div>
           <Sparkline values={waterHistory.map((v) => v / 1000)} color="#38bdf8" />
-          <label htmlFor="water-slider" className="text-xs text-slate-500 mt-1 block">Usage: {metrics.waterUsageLitres.toLocaleString()} L</label>
+          <label htmlFor="water-slider" className="text-xs text-slate-400 mt-1 block">Usage: {metrics.waterUsageLitres.toLocaleString()} L</label>
           <input id="water-slider" type="range" min={10000} max={80000} step={1000} value={metrics.waterUsageLitres}
             onChange={(e) => setMetrics((m) => ({ ...m, waterUsageLitres: +e.target.value }))}
             className="w-full mt-1 accent-sky-500" aria-label="Water usage slider" />

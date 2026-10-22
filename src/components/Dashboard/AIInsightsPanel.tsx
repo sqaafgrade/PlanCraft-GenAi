@@ -125,7 +125,7 @@ export const AIInsightsPanel = memo(function AIInsightsPanel({
       )}
 
       {!insight && !isLoading && (
-        <div className="text-center py-8 text-slate-500">
+        <div className="text-center py-8 text-slate-400">
           <p aria-label="No insights generated yet">Select a match phase and generate AI insights to see crowd intelligence recommendations.</p>
         </div>
       )}

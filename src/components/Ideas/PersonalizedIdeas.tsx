@@ -300,7 +300,7 @@ export const PersonalizedIdeas = memo(function PersonalizedIdeas({ event }: Pers
             <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
               <div className="flex gap-1 flex-wrap">
                 {idea.tags.map((tag) => (
-                  <span key={tag} className="text-[10px] text-slate-500">
+                  <span key={tag} className="text-[10px] text-slate-400">
                     #{tag}
                   </span>
                 ))}
@@ -310,7 +310,7 @@ export const PersonalizedIdeas = memo(function PersonalizedIdeas({ event }: Pers
                 type="button"
                 aria-label={`Remove idea ${idea.title}`}
                 onClick={() => handleDeleteIdea(idea.id)}
-                className="text-slate-500 hover:text-rose-400 transition-colors focus:outline-none"
+                className="text-slate-400 hover:text-rose-400 transition-colors focus:outline-none"
               >
                 ✕
               </button>

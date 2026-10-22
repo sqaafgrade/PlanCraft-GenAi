@@ -11,15 +11,32 @@ import {
 } from '@/lib/eventCompute';
 import { loadEventBudget, saveEventBudget } from '@/services/storageService';
 
+/**
+ * Return interface for the useEventBudget hook.
+ */
 export interface UseEventBudgetReturn {
+  /** Array of itemized budget expense items */
   items: BudgetItem[];
+  /** Computed budget summary metrics and overrun status */
   summary: BudgetSummary;
+  /** Appends a new budget line item */
   addItem: (item: Omit<BudgetItem, 'id' | 'eventId'>) => void;
+  /** Modifies an existing line item by ID */
   updateItem: (id: string, updates: Partial<BudgetItem>) => void;
+  /** Deletes an expense item by ID */
   deleteItem: (id: string) => void;
+  /** Resets items to standard event category allocation benchmarks */
   applyDefaultAllocations: (eventType: EventType, totalBudget: number) => void;
 }
 
+/**
+ * Custom React hook for tracking event budgets, expense line items, and overrun alerts.
+ *
+ * @param eventId - The unique event ID
+ * @param totalBudget - The total budget ceiling
+ * @param eventType - The classification of the event
+ * @returns Budget items, computed totals, and mutation handlers
+ */
 export function useEventBudget(
   eventId: string,
   totalBudget: number,

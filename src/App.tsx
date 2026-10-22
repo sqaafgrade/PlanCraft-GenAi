@@ -6,7 +6,8 @@
 
 import { memo } from 'react';
 import { TabId } from '@/types';
-import { AppContextProvider, useAppContext } from '@/context/AppContext';
+import { AppContextProvider } from '@/context/AppContext';
+import { useAppContext } from '@/hooks/useAppContext';
 import { EventDashboard } from '@/components/Dashboard/EventDashboard';
 import { AIPlanningAssistant } from '@/components/Assistant/AIPlanningAssistant';
 import { BudgetManager } from '@/components/Budget/BudgetManager';
@@ -153,7 +154,7 @@ const AppShell = memo(function AppShell() {
         aria-label="Application footer"
         className="border-t border-slate-800/80 py-4 px-4"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
           <span>PlanCraft GenAI · Weddings, Birthdays & Community Events</span>
           <span>WCAG 2.2 AA · Zero-Trust Security · Verified Tests</span>
         </div>

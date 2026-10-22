@@ -306,7 +306,7 @@ export const VendorChecklist = memo(function VendorChecklist({ event }: VendorCh
         </div>
 
         {filteredItems.length === 0 ? (
-          <p className="text-xs text-slate-500 text-center py-8">
+          <p className="text-xs text-slate-400 text-center py-8">
             No vendor checklist items match the selected filter.
           </p>
         ) : (
@@ -367,7 +367,7 @@ export const VendorChecklist = memo(function VendorChecklist({ event }: VendorCh
                       type="button"
                       aria-label={`Delete vendor ${item.name}`}
                       onClick={() => deleteItem(item.id)}
-                      className="text-slate-500 hover:text-rose-400 transition-colors focus:outline-none"
+                      className="text-slate-400 hover:text-rose-400 transition-colors focus:outline-none"
                     >
                       ✕
                     </button>

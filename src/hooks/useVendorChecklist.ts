@@ -12,16 +12,33 @@ import {
 } from '@/lib/eventCompute';
 import { loadEventVendors, saveEventVendors } from '@/services/storageService';
 
+/**
+ * Return interface for the useVendorChecklist hook.
+ */
 export interface UseVendorChecklistReturn {
+  /** Array of vendor checklist items */
   items: VendorChecklistItem[];
+  /** Aggregated checklist progress metrics */
   progress: ChecklistProgress;
+  /** Appends a new vendor checklist item */
   addItem: (item: Omit<VendorChecklistItem, 'id' | 'eventId'>) => void;
+  /** Updates the lifecycle status of a vendor (e.g. booked, confirmed) */
   updateStatus: (id: string, status: VendorStatus) => void;
+  /** Modifies vendor fields by ID */
   updateItem: (id: string, updates: Partial<VendorChecklistItem>) => void;
+  /** Removes a vendor item by ID */
   deleteItem: (id: string) => void;
+  /** Regenerates default benchmark vendor checklist for the event type */
   regenerateDefaults: (eventType: EventType) => void;
 }
 
+/**
+ * Custom React hook for tracking event vendors, booking milestones, and contact information.
+ *
+ * @param eventId - The unique event ID
+ * @param eventType - Event category for default vendor suggestions
+ * @returns Vendor items, progress metrics, and mutation methods
+ */
 export function useVendorChecklist(
   eventId: string,
   eventType: EventType = EventType.Wedding
