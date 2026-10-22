@@ -29,14 +29,33 @@ export const VALID_LANGUAGES = [
 ] as const;
 export type LangCode = (typeof VALID_LANGUAGES)[number];
 
+/**
+ * Validates that an unknown value is a finite number.
+ *
+ * @param v - Value to check
+ * @returns True if value is a finite number
+ */
 export function isFiniteNumber(v: unknown): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
 
+/**
+ * Sanitizes user-provided string inputs to mitigate prompt injection and control character abuse.
+ * Strips ASCII control characters (U+0000 to U+001F, U+007F) and neutralizes markdown fence breakouts.
+ *
+ * @param input - The untrusted raw string to sanitize
+ * @returns Sanitized string safe for prompt interpolation and storage
+ */
 export function sanitizeString(input: string): string {
-  // Strip control chars U+0000–U+001F to mitigate prompt injection
-  const controlCharPattern = new RegExp('[' + String.fromCharCode(0) + '-' + String.fromCharCode(31) + ']', 'g');
-  return input.replace(controlCharPattern, '').trim();
+  if (typeof input !== 'string') return '';
+  const controlCharPattern = new RegExp(
+    '[' + String.fromCharCode(0) + '-' + String.fromCharCode(31) + String.fromCharCode(127) + ']',
+    'g'
+  );
+  return input
+    .replace(controlCharPattern, '')
+    .replace(/```/g, "'''")
+    .trim();
 }
 
 export interface PlanPayload {
@@ -54,6 +73,13 @@ export interface PlanPayload {
   specialRequests?: string;
 }
 
+/**
+ * Validates that an unknown object conforms to the strict PlanPayload schema.
+ * Performs deep type-guards, regex date verification, and numerical boundary checks.
+ *
+ * @param p - Unknown request payload
+ * @returns True if payload satisfies all schema constraints
+ */
 export function validatePlanPayload(p: unknown): p is PlanPayload {
   if (typeof p !== 'object' || p === null) return false;
   const obj = p as Record<string, unknown>;
@@ -91,7 +117,12 @@ export function validatePlanPayload(p: unknown): p is PlanPayload {
   return true;
 }
 
-// Backward-compatible zone validator for legacy test preservation
+/**
+ * Backward-compatible zone validator for legacy integration test preservation.
+ *
+ * @param z - Unknown zone object
+ * @returns True if valid zone object
+ */
 export function validateZone(z: unknown): boolean {
   if (typeof z !== 'object' || z === null) return false;
   const obj = z as Record<string, unknown>;
@@ -106,6 +137,12 @@ export function validateZone(z: unknown): boolean {
   return true;
 }
 
+/**
+ * Generates a deterministic, collision-resistant 16-hex hash of an arbitrary payload for caching.
+ *
+ * @param obj - Arbitrary payload to hash
+ * @returns 16-character hexadecimal hash
+ */
 export function hashPayload(obj: unknown): string {
   const str = JSON.stringify(obj);
   let h1 = 0x811c9dc5;

@@ -15,6 +15,7 @@ import { MultilingualAssistant } from '@/components/Multilingual/MultilingualAss
 import { AlertBanner } from '@/components/shared/AlertBanner';
 import { AppContextProvider } from '@/context/AppContext';
 import { EventItem, EventType, EventStatus, AlertSeverity } from '@/types';
+import App from '../App';
 
 const mockEvent: EventItem = {
   id: 'dom-evt-1',
@@ -237,5 +238,41 @@ describe('AlertBanner — DOM Interactions', () => {
     const dismissBtn = screen.getByLabelText(/Dismiss alert: Budget Alert/i);
     fireEvent.click(dismissBtn);
     expect(onDismiss).toHaveBeenCalledWith('alt-test-1');
+  });
+});
+
+// ── 8. WCAG 2.2 Level AA Landmark & Navigation Accessibility ──
+describe('Accessibility Audits — WCAG 2.2 AA Conformance', () => {
+  it('renders tablist with correct ARIA roles, controls, and tabindex', () => {
+    render(<App />);
+    const tablist = screen.getByRole('tablist', { name: /Application sections/i });
+    expect(tablist).toBeInTheDocument();
+
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.length).toBeGreaterThanOrEqual(7);
+
+    // Default active tab (Dashboard)
+    const activeTab = tabs.find((t) => t.getAttribute('aria-selected') === 'true');
+    expect(activeTab).toBeDefined();
+    expect(activeTab).toHaveAttribute('aria-controls', 'main-content');
+    expect(activeTab).toHaveAttribute('tabIndex', '0');
+
+    // Main landmark matches tabpanel with id main-content
+    const mainLandmark = screen.getByRole('tabpanel');
+    expect(mainLandmark).toHaveAttribute('id', 'main-content');
+    expect(mainLandmark).toHaveAttribute('tabIndex', '-1');
+  });
+
+  it('provides aria-pressed attributes on dietary filter chips', () => {
+    render(
+      <AppContextProvider>
+        <AIPlanningAssistant />
+      </AppContextProvider>
+    );
+
+    const veganBtn = screen.getByRole('button', { name: /\+ Vegan/i });
+    expect(veganBtn).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(veganBtn);
+    expect(veganBtn).toHaveAttribute('aria-pressed', 'true');
   });
 });

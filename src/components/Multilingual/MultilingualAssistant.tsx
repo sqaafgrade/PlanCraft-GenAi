@@ -101,10 +101,10 @@ export const MultilingualAssistant = memo(function MultilingualAssistant() {
 
         {/* Language selector */}
         <div className="mb-4">
-          <label htmlFor="lang-selector" className="text-xs text-slate-400 font-medium block mb-2">
+          <p id="lang-selector-label" className="text-xs text-slate-300 font-medium block mb-2">
             Target Language
-          </label>
-          <div className="grid grid-cols-4 md:grid-cols-5 gap-2" role="group" aria-label="Language selection">
+          </p>
+          <div className="grid grid-cols-4 md:grid-cols-5 gap-2" role="group" aria-labelledby="lang-selector-label">
             {LANGUAGES.map((lang) => (
               <button
                 key={lang.code}

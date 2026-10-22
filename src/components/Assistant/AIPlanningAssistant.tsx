@@ -8,6 +8,7 @@
 import { memo, useState } from 'react';
 import {
   EventType,
+  EventStatus,
   AIPlanRequest,
   AIPlanResponse,
   TabId,
@@ -125,7 +126,7 @@ export const AIPlanningAssistant = memo(function AIPlanningAssistant({
         location,
         guestCount,
         totalBudget,
-        status: activeEvent?.status ?? (undefined as any),
+        status: activeEvent?.status ?? EventStatus.Planning,
         preferences: {
           themePreference,
           venuePreference,
@@ -374,11 +375,12 @@ export const AIPlanningAssistant = memo(function AIPlanningAssistant({
                   <button
                     key={opt}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => toggleDietary(opt)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                       active
                         ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                        : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700'
                     }`}
                   >
                     {active ? '✓ ' : '+ '}
@@ -401,11 +403,12 @@ export const AIPlanningAssistant = memo(function AIPlanningAssistant({
                   <button
                     key={opt}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => toggleAccessibility(opt)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                       active
                         ? 'bg-teal-600 text-white shadow-sm'
-                        : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                        : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700'
                     }`}
                   >
                     {active ? '✓ ' : '+ '}

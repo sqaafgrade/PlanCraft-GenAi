@@ -33,6 +33,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
+// ── Security: Reverse Proxy Trust (Render / Cloudflare) ──────
+app.set('trust proxy', 1);
+
 // Request logger middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`[REQUEST] ${req.method} ${req.url}`);
@@ -42,7 +45,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// ── 1. Security: Helmet with strict CSP ─────────────────────
+// ── 1. Security: Helmet with strict CSP & clickjacking defense ───
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -53,10 +56,19 @@ app.use(
         imgSrc: ["'self'", 'data:', 'https:'],
         connectSrc: ["'self'", 'https://*.googleapis.com', 'https://*.firebaseapp.com'],
         objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
         upgradeInsecureRequests: [],
       },
     },
+    frameguard: { action: 'deny' },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
   })
 );
 
@@ -453,8 +465,9 @@ app.get('*splat', (_req: Request, res: Response) => {
 });
 
 // Error handling middleware (CWE-209 safe)
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[ERROR HANDLER] Unhandled Error:', err);
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
+  const errMsg = err instanceof Error ? err.message : String(err);
+  console.error('[ERROR HANDLER] Unhandled Error:', errMsg);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 

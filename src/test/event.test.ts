@@ -109,7 +109,7 @@ describe('computeBudgetSummary', () => {
   });
 
   it('throws TypeError if items is not an array', () => {
-    expect(() => computeBudgetSummary(1000, null as any)).toThrow(TypeError);
+    expect(() => computeBudgetSummary(1000, null as unknown as BudgetItem[])).toThrow(TypeError);
   });
 });
 

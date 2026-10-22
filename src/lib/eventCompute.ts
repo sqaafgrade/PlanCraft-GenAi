@@ -20,6 +20,9 @@ import {
 
 /**
  * Validates a monetary input. Must be finite, non-negative, and <= 100,000,000.
+ *
+ * @param amount - The numerical amount to validate
+ * @returns True if amount is a finite, valid currency figure
  */
 export function validateMonetaryAmount(amount: unknown): amount is number {
   return typeof amount === 'number' && Number.isFinite(amount) && amount >= 0 && amount <= 100_000_000;
@@ -27,6 +30,13 @@ export function validateMonetaryAmount(amount: unknown): amount is number {
 
 /**
  * Computes structured budget summary with utilization, contingency, and overrun detection.
+ *
+ * @param totalBudget - The total available budget ceiling
+ * @param items - Array of budgeted expense line items
+ * @param contingencyPercent - Desired contingency reserve (clamped 0–30%, default 10%)
+ * @returns Full budget breakdown with status, utilization, and category sums
+ * @throws {RangeError} If totalBudget is negative or exceeds 100,000,000
+ * @throws {TypeError} If items is not an array
  */
 export function computeBudgetSummary(
   totalBudget: number,
@@ -96,6 +106,11 @@ export function computeBudgetSummary(
 
 /**
  * Generates sensible baseline budget allocations based on event type.
+ *
+ * @param eventType - Target event category (wedding, birthday, community, etc.)
+ * @param totalBudget - The total available event budget
+ * @returns Map of budget categories to allocated currency amounts
+ * @throws {RangeError} If totalBudget is not a valid monetary amount
  */
 export function computeCategoryAllocations(
   eventType: EventType,
@@ -173,6 +188,9 @@ export function computeCategoryAllocations(
 
 /**
  * Validates an ISO date string (YYYY-MM-DD).
+ *
+ * @param dateString - The raw date string to validate
+ * @returns True if date matches YYYY-MM-DD and represents a real calendar date
  */
 export function validateIsoDate(dateString: string): boolean {
   if (typeof dateString !== 'string') return false;
@@ -193,6 +211,11 @@ export function validateIsoDate(dateString: string): boolean {
 
 /**
  * Calculates calendar days remaining until an event date.
+ *
+ * @param eventDateIso - Event target date in YYYY-MM-DD
+ * @param referenceDateIso - Optional reference date (defaults to today)
+ * @returns Number of calendar days until the event (positive for future, negative for past)
+ * @throws {RangeError} If date format is invalid
  */
 export function calculateDaysRemaining(eventDateIso: string, referenceDateIso?: string): number {
   if (!validateIsoDate(eventDateIso)) {
@@ -210,6 +233,11 @@ export function calculateDaysRemaining(eventDateIso: string, referenceDateIso?: 
 
 /**
  * Adds or subtracts days to an ISO date and returns YYYY-MM-DD.
+ *
+ * @param isoDate - Base date in YYYY-MM-DD
+ * @param daysOffset - Positive or negative number of days to shift
+ * @returns Resulting ISO date string YYYY-MM-DD
+ * @throws {RangeError} If base date is invalid
  */
 export function shiftIsoDate(isoDate: string, daysOffset: number): string {
   if (!validateIsoDate(isoDate)) {
@@ -223,6 +251,12 @@ export function shiftIsoDate(isoDate: string, daysOffset: number): string {
 
 /**
  * Generates appropriate milestone tasks customized by event type and event date.
+ *
+ * @param eventDateIso - Event target date in YYYY-MM-DD
+ * @param eventType - Event type to select tailored milestone templates
+ * @param eventId - Parent event ID
+ * @returns Ordered timeline tasks with calculated target dates and priorities
+ * @throws {RangeError} If eventDateIso is invalid
  */
 export function generateDefaultMilestones(
   eventDateIso: string,
@@ -300,6 +334,13 @@ export interface ChecklistProgress {
   completionPercent: number;
 }
 
+/**
+ * Computes progress and status breakdown across vendor checklist items.
+ *
+ * @param items - List of vendor checklist items
+ * @returns Summary metrics with completion percentage and count by status
+ * @throws {TypeError} If items is not an array
+ */
 export function computeChecklistProgress(items: VendorChecklistItem[]): ChecklistProgress {
   if (!Array.isArray(items)) {
     throw new TypeError('items must be an array');
@@ -348,6 +389,10 @@ export function computeChecklistProgress(items: VendorChecklistItem[]): Checklis
 
 /**
  * Creates default vendor checklist entries customized by event type.
+ *
+ * @param eventType - Target event category (wedding, birthday, community)
+ * @param eventId - Parent event ID
+ * @returns Standard vendor checklist items with initial cost estimates and priorities
  */
 export function generateDefaultVendorChecklist(
   eventType: EventType,
@@ -408,6 +453,9 @@ export interface EventSustainabilityInput {
 
 /**
  * Computes a composite 0-100 eco-friendliness score for an event plan.
+ *
+ * @param input - Sustainability practices implemented in the event
+ * @returns Composite eco score between 0 and 100
  */
 export function computeEventSustainabilityScore(input: EventSustainabilityInput): number {
   const localScore = Math.min(100, Math.max(0, input.localVendorPercent)) * 0.3;
@@ -427,6 +475,14 @@ export interface AdjacencyEntry {
   weight: number;
 }
 
+/**
+ * Finds the shortest path between two nodes in a weighted adjacency graph using Dijkstra's algorithm.
+ *
+ * @param adjacency - Graph adjacency representation mapping node IDs to weighted edges
+ * @param start - Starting node ID
+ * @param end - Destination node ID
+ * @returns Array of node IDs representing the optimal path, or null if no path exists
+ */
 export function dijkstra(
   adjacency: Record<string, AdjacencyEntry[]>,
   start: string,

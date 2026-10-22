@@ -75,7 +75,7 @@ const AppShell = memo(function AppShell() {
         >
           <div
             role="tablist"
-            aria-label="Tab panels"
+            aria-label="Application sections"
             className="flex gap-1 pb-0.5"
           >
             {TABS.map((tab) => {
@@ -86,13 +86,14 @@ const AppShell = memo(function AppShell() {
                   id={`tab-${tab.id}`}
                   role="tab"
                   aria-selected={isActive}
-                  aria-controls={`panel-${tab.id}`}
+                  aria-controls="main-content"
+                  tabIndex={isActive ? 0 : -1}
                   onClick={() => setActiveTab(tab.id)}
                   className={`relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold rounded-t-lg transition-all whitespace-nowrap
                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-inset
                     ${isActive
                       ? 'text-white bg-slate-800/60 border-b-2 border-indigo-500'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'}`}
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800/30'}`}
                   aria-label={tab.ariaLabel}
                 >
                   <span aria-hidden="true">{tab.icon}</span>
@@ -106,7 +107,7 @@ const AppShell = memo(function AppShell() {
 
       {/* ── Main content ── */}
       <main
-        id={`panel-${activeTab}`}
+        id="main-content"
         role="tabpanel"
         aria-labelledby={`tab-${activeTab}`}
         aria-label={TABS.find((t) => t.id === activeTab)?.ariaLabel}
