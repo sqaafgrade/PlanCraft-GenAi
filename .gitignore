@@ -17,6 +17,7 @@ dist-ssr
 *.tsbuildinfo
 src/**/*.js
 src/**/*.d.ts
+package-lock.json
 
 # Editor directories and files
 .vscode/*

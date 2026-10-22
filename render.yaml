@@ -9,6 +9,6 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
-        value: 20.18.0
+        value: 22.12.0
       - key: GEMINI_API_KEY
         sync: false
