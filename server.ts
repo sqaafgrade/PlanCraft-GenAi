@@ -69,8 +69,7 @@ app.use(
       if (
         ALLOWED_ORIGINS.includes(origin) ||
         origin.startsWith('http://localhost:') ||
-        (origin.includes('smartstadium') && origin.endsWith('.onrender.com')) ||
-        (origin.includes('planner') && origin.endsWith('.onrender.com'))
+        origin.endsWith('.onrender.com')
       ) {
         return callback(null, true);
       }
