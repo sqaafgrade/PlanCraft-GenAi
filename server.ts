@@ -111,9 +111,9 @@ function pruneCache(): void {
 // ── 6. Gemini client (server-side only) ─────────────────────
 const apiKey = process.env.GEMINI_API_KEY ?? '';
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-3.8-flash' });
+const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
-async function callGeminiWithTimeout<T>(promise: Promise<T>, ms = 3000): Promise<T> {
+async function callGeminiWithTimeout<T>(promise: Promise<T>, ms = 25000): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timer = setTimeout(() => reject(new Error('AI generation timeout')), ms);
